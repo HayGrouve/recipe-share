@@ -1,0 +1,306 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model (linked to Clerk authentication)
+model User {
+  id        String   @id @default(cuid())
+  clerkId   String   @unique // Clerk user ID
+  email     String   @unique
+  firstName String?
+  lastName  String?
+  username  String?  @unique
+  avatar    String?
+  bio       String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // User's recipes
+  recipes Recipe[]
+
+  // User interactions
+  ratings     Rating[]
+  comments    Comment[]
+  saves       SavedRecipe[]
+  collections Collection[]
+
+  // Social features
+  following Follow[] @relation("Follower")
+  followers Follow[] @relation("Following")
+
+  @@map("users")
+}
+
+// Follow model for social features
+model Follow {
+  id          String @id @default(cuid())
+  followerId  String
+  followingId String
+  createdAt   DateTime @default(now())
+
+  follower  User @relation("Follower", fields: [followerId], references: [id], onDelete: Cascade)
+  following User @relation("Following", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId])
+  @@map("follows")
+}
+
+// Recipe model
+model Recipe {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  content     String?  // Rich text content from editor
+  servings    Int?
+  prepTime    Int?     // in minutes
+  cookTime    Int?     // in minutes
+  totalTime   Int?     // in minutes
+  difficulty  String?  // Easy, Medium, Hard
+  isPublic    Boolean  @default(true)
+  slug        String?  @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Author
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  // Recipe components
+  ingredients RecipeIngredient[]
+  instructions Instruction[]
+  images       RecipeImage[]
+  nutrition    Nutrition?
+
+  // Categorization
+  categories RecipeCategory[]
+  tags       RecipeTag[]
+
+  // User interactions
+  ratings  Rating[]
+  comments Comment[]
+  saves    SavedRecipe[]
+
+  // Collections
+  collectionRecipes CollectionRecipe[]
+
+  @@map("recipes")
+}
+
+// Ingredient model
+model Ingredient {
+  id   String @id @default(cuid())
+  name String @unique
+  unit String? // default unit for this ingredient
+
+  // Recipes using this ingredient
+  recipeIngredients RecipeIngredient[]
+
+  @@map("ingredients")
+}
+
+// Junction table for recipes and ingredients with quantities
+model RecipeIngredient {
+  id       String  @id @default(cuid())
+  quantity String? // e.g., "2", "1/2", "1.5"
+  unit     String? // e.g., "cups", "tbsp", "pieces"
+  notes    String? // e.g., "finely chopped", "optional"
+
+  recipeId     String
+  ingredientId String
+
+  recipe     Recipe     @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  ingredient Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
+
+  @@unique([recipeId, ingredientId])
+  @@map("recipe_ingredients")
+}
+
+// Instructions model for step-by-step recipe instructions
+model Instruction {
+  id          String @id @default(cuid())
+  stepNumber  Int
+  content     String
+  timeMinutes Int?   // time for this specific step
+
+  recipeId String
+  recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@unique([recipeId, stepNumber])
+  @@map("instructions")
+}
+
+// Recipe images model
+model RecipeImage {
+  id       String  @id @default(cuid())
+  url      String
+  alt      String?
+  caption  String?
+  isPrimary Boolean @default(false)
+
+  recipeId String
+  recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@map("recipe_images")
+}
+
+// Categories model
+model Category {
+  id          String @id @default(cuid())
+  name        String @unique
+  description String?
+  slug        String @unique
+  color       String? // hex color for UI
+  icon        String? // icon name
+
+  recipes RecipeCategory[]
+
+  @@map("categories")
+}
+
+// Junction table for recipes and categories
+model RecipeCategory {
+  recipeId   String
+  categoryId String
+
+  recipe   Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([recipeId, categoryId])
+  @@map("recipe_categories")
+}
+
+// Tags model for flexible labeling
+model Tag {
+  id   String @id @default(cuid())
+  name String @unique
+  slug String @unique
+
+  recipes RecipeTag[]
+
+  @@map("tags")
+}
+
+// Junction table for recipes and tags
+model RecipeTag {
+  recipeId String
+  tagId    String
+
+  recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([recipeId, tagId])
+  @@map("recipe_tags")
+}
+
+// Nutrition information model
+model Nutrition {
+  id           String @id @default(cuid())
+  calories     Int?
+  protein      Float? // in grams
+  carbs        Float? // in grams
+  fat          Float? // in grams
+  fiber        Float? // in grams
+  sugar        Float? // in grams
+  sodium       Float? // in milligrams
+  cholesterol  Float? // in milligrams
+  saturatedFat Float? // in grams
+
+  recipeId String @unique
+  recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@map("nutrition")
+}
+
+// Ratings model
+model Rating {
+  id     String @id @default(cuid())
+  score  Int    // 1-5 stars
+  review String?
+
+  userId   String
+  recipeId String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, recipeId])
+  @@map("ratings")
+}
+
+// Comments model
+model Comment {
+  id      String @id @default(cuid())
+  content String
+
+  userId   String
+  recipeId String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("comments")
+}
+
+// Saved recipes model (user bookmarks)
+model SavedRecipe {
+  id String @id @default(cuid())
+
+  userId   String
+  recipeId String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, recipeId])
+  @@map("saved_recipes")
+}
+
+// Collections model (user-created recipe lists)
+model Collection {
+  id          String  @id @default(cuid())
+  name        String
+  description String?
+  isPublic    Boolean @default(false)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  recipes CollectionRecipe[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("collections")
+}
+
+// Junction table for collections and recipes
+model CollectionRecipe {
+  id String @id @default(cuid())
+
+  collectionId String
+  recipeId     String
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  recipe       Recipe     @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  addedAt DateTime @default(now())
+
+  @@unique([collectionId, recipeId])
+  @@map("collection_recipes")
+}
