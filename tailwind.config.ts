@@ -14,6 +14,8 @@ const config: Config = {
         DEFAULT: '1rem',
         sm: '1.5rem',
         lg: '2rem',
+        xl: '2rem',
+        '2xl': '2rem',
       },
       screens: {
         sm: '640px',
