@@ -16,25 +16,50 @@ import {
   Heart,
   Utensils,
 } from 'lucide-react';
+import { FeaturedRecipesCarousel } from '@/components/ui/featured-recipes-carousel';
+import { TestimonialsSection } from '@/components/ui/testimonials-section';
 
 export default function HomePage() {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="from-primary/10 via-accent/5 to-secondary/10 relative bg-gradient-to-br py-20 lg:py-32">
-        <div className="container">
+      <section className="relative flex min-h-[90vh] items-center justify-center overflow-hidden bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50">
+        {/* Background Image */}
+        <div className="absolute inset-0 z-0">
+          <div
+            className="h-full w-full bg-cover bg-center bg-no-repeat opacity-20"
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23f97316' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+            }}
+          />
+        </div>
+
+        {/* Content */}
+        <div className="relative z-10 container">
           <div className="mx-auto max-w-4xl text-center">
-            <h1 className="font-serif text-4xl font-bold tracking-tight sm:text-6xl lg:text-7xl">
+            <div className="bg-primary/10 text-primary mb-8 inline-flex items-center rounded-full px-4 py-2 text-sm font-medium">
+              <ChefHat className="mr-2 h-4 w-4" />
+              Welcome to RecipeShare
+            </div>
+
+            <h1 className="font-serif text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl lg:text-7xl">
               Share Your <span className="text-primary">Culinary</span>{' '}
+              <br className="hidden sm:block" />
               Adventures
             </h1>
-            <p className="text-muted-foreground mx-auto mt-6 max-w-2xl text-lg leading-8">
+
+            <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-gray-600">
               Discover, create, and share delicious recipes with your friends.
               RecipeShare makes it easy to organize your favorite dishes and
               explore new culinary horizons together.
             </p>
-            <div className="mt-10 flex items-center justify-center gap-x-6">
-              <Button asChild size="lg" className="px-8 text-lg">
+
+            <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row sm:gap-6">
+              <Button
+                asChild
+                size="lg"
+                className="w-full px-8 text-lg shadow-lg transition-shadow hover:shadow-xl sm:w-auto"
+              >
                 <Link href="/recipes">
                   <Search className="mr-2 h-5 w-5" />
                   Explore Recipes
@@ -44,7 +69,7 @@ export default function HomePage() {
                 asChild
                 variant="outline"
                 size="lg"
-                className="px-8 text-lg"
+                className="hover:bg-primary/5 w-full border-2 px-8 text-lg sm:w-auto"
               >
                 <Link href="/create">
                   <BookOpen className="mr-2 h-5 w-5" />
@@ -52,9 +77,28 @@ export default function HomePage() {
                 </Link>
               </Button>
             </div>
+
+            {/* Trust indicators */}
+            <div className="mt-12 flex flex-col items-center justify-center gap-4 text-sm text-gray-500 sm:flex-row sm:gap-8">
+              <div className="flex items-center">
+                <Star className="mr-1 h-4 w-4 fill-yellow-400 text-yellow-400" />
+                <span className="font-medium">4.9/5 rating</span>
+              </div>
+              <div className="flex items-center">
+                <Users className="mr-1 h-4 w-4" />
+                <span className="font-medium">25+ active friends</span>
+              </div>
+              <div className="flex items-center">
+                <BookOpen className="mr-1 h-4 w-4" />
+                <span className="font-medium">150+ recipes</span>
+              </div>
+            </div>
           </div>
         </div>
       </section>
+
+      {/* Featured Recipes Carousel */}
+      <FeaturedRecipesCarousel />
 
       {/* Stats Section */}
       <section className="bg-muted/30 py-16">
@@ -188,6 +232,9 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Testimonials Section */}
+      <TestimonialsSection />
 
       {/* CTA Section */}
       <section className="from-primary to-secondary bg-gradient-to-r py-20">

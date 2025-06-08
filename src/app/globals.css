@@ -1,5 +1,5 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -42,85 +42,85 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-  
+
   /* RecipeShare Custom Colors */
-  --color-warm-orange: #FF6B35;
-  --color-deep-green: #4A7C59;
-  --color-golden-yellow: #F4A261;
-  --color-warm-gray-50: #F8F9FA;
-  --color-warm-gray-900: #2D3436;
-  --color-cream-white: #FEFEFE;
+  --color-warm-orange: #ff6b35;
+  --color-deep-green: #4a7c59;
+  --color-golden-yellow: #f4a261;
+  --color-warm-gray-50: #f8f9fa;
+  --color-warm-gray-900: #2d3436;
+  --color-cream-white: #fefefe;
 }
 
 :root {
   --radius: 0.625rem;
-  
+
   /* Updated color palette for RecipeShare */
-  --background: #FEFEFE; /* Cream White */
-  --foreground: #2D3436; /* Warm Gray 900 */
-  --card: #FEFEFE;
-  --card-foreground: #2D3436;
-  --popover: #FEFEFE;
-  --popover-foreground: #2D3436;
-  --primary: #FF6B35; /* Warm Orange */
-  --primary-foreground: #FEFEFE;
-  --secondary: #4A7C59; /* Deep Green */
-  --secondary-foreground: #FEFEFE;
-  --muted: #F8F9FA; /* Warm Gray 50 */
-  --muted-foreground: #6C757D;
-  --accent: #F4A261; /* Golden Yellow */
-  --accent-foreground: #2D3436;
-  --destructive: #DC3545;
-  --border: #E9ECEF;
-  --input: #E9ECEF;
-  --ring: #FF6B35; /* Warm Orange for focus rings */
-  --chart-1: #FF6B35;
-  --chart-2: #4A7C59;
-  --chart-3: #F4A261;
-  --chart-4: #6C757D;
-  --chart-5: #ADB5BD;
-  --sidebar: #FEFEFE;
-  --sidebar-foreground: #2D3436;
-  --sidebar-primary: #FF6B35;
-  --sidebar-primary-foreground: #FEFEFE;
-  --sidebar-accent: #F8F9FA;
-  --sidebar-accent-foreground: #2D3436;
-  --sidebar-border: #E9ECEF;
-  --sidebar-ring: #FF6B35;
+  --background: #fefefe; /* Cream White */
+  --foreground: #2d3436; /* Warm Gray 900 */
+  --card: #fefefe;
+  --card-foreground: #2d3436;
+  --popover: #fefefe;
+  --popover-foreground: #2d3436;
+  --primary: #ff6b35; /* Warm Orange */
+  --primary-foreground: #fefefe;
+  --secondary: #4a7c59; /* Deep Green */
+  --secondary-foreground: #fefefe;
+  --muted: #f8f9fa; /* Warm Gray 50 */
+  --muted-foreground: #6c757d;
+  --accent: #f4a261; /* Golden Yellow */
+  --accent-foreground: #2d3436;
+  --destructive: #dc3545;
+  --border: #e9ecef;
+  --input: #e9ecef;
+  --ring: #ff6b35; /* Warm Orange for focus rings */
+  --chart-1: #ff6b35;
+  --chart-2: #4a7c59;
+  --chart-3: #f4a261;
+  --chart-4: #6c757d;
+  --chart-5: #adb5bd;
+  --sidebar: #fefefe;
+  --sidebar-foreground: #2d3436;
+  --sidebar-primary: #ff6b35;
+  --sidebar-primary-foreground: #fefefe;
+  --sidebar-accent: #f8f9fa;
+  --sidebar-accent-foreground: #2d3436;
+  --sidebar-border: #e9ecef;
+  --sidebar-ring: #ff6b35;
 }
 
 .dark {
-  --background: #1A1A1A;
-  --foreground: #FEFEFE;
-  --card: #2D3436;
-  --card-foreground: #FEFEFE;
-  --popover: #2D3436;
-  --popover-foreground: #FEFEFE;
-  --primary: #FF6B35;
-  --primary-foreground: #FEFEFE;
-  --secondary: #4A7C59;
-  --secondary-foreground: #FEFEFE;
-  --muted: #343A40;
-  --muted-foreground: #ADB5BD;
-  --accent: #F4A261;
-  --accent-foreground: #1A1A1A;
-  --destructive: #DC3545;
+  --background: #1a1a1a;
+  --foreground: #fefefe;
+  --card: #2d3436;
+  --card-foreground: #fefefe;
+  --popover: #2d3436;
+  --popover-foreground: #fefefe;
+  --primary: #ff6b35;
+  --primary-foreground: #fefefe;
+  --secondary: #4a7c59;
+  --secondary-foreground: #fefefe;
+  --muted: #343a40;
+  --muted-foreground: #adb5bd;
+  --accent: #f4a261;
+  --accent-foreground: #1a1a1a;
+  --destructive: #dc3545;
   --border: #495057;
   --input: #495057;
-  --ring: #FF6B35;
-  --chart-1: #FF6B35;
-  --chart-2: #4A7C59;
-  --chart-3: #F4A261;
-  --chart-4: #ADB5BD;
-  --chart-5: #6C757D;
-  --sidebar: #2D3436;
-  --sidebar-foreground: #FEFEFE;
-  --sidebar-primary: #FF6B35;
-  --sidebar-primary-foreground: #FEFEFE;
-  --sidebar-accent: #343A40;
-  --sidebar-accent-foreground: #FEFEFE;
+  --ring: #ff6b35;
+  --chart-1: #ff6b35;
+  --chart-2: #4a7c59;
+  --chart-3: #f4a261;
+  --chart-4: #adb5bd;
+  --chart-5: #6c757d;
+  --sidebar: #2d3436;
+  --sidebar-foreground: #fefefe;
+  --sidebar-primary: #ff6b35;
+  --sidebar-primary-foreground: #fefefe;
+  --sidebar-accent: #343a40;
+  --sidebar-accent-foreground: #fefefe;
   --sidebar-border: #495057;
-  --sidebar-ring: #FF6B35;
+  --sidebar-ring: #ff6b35;
 }
 
 @layer base {
