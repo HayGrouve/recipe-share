@@ -1,40 +1,62 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { eq } from 'drizzle-orm';
+import { eq, count, desc } from 'drizzle-orm';
 import { db, users, AsyncUserRouteParams } from '@/lib/db';
+import { recipes, collections } from '@haygrouve/db-schema';
 import { getAuthenticatedUser } from '@/lib/auth';
 
-// GET /api/users/[id] - Get user profile
-export async function GET(request: NextRequest, context: AsyncUserRouteParams) {
-  try {
-    const { id } = await context.params;
+interface RouteParams {
+  params: Promise<{ id: string }>;
+}
 
-    if (!id) {
+// GET /api/users/[id] - Get user profile
+export async function GET(request: NextRequest, { params }: RouteParams) {
+  try {
+    const { id: userId } = await params;
+
+    if (!userId) {
       return NextResponse.json(
         { error: 'User ID is required' },
         { status: 400 }
       );
     }
 
-    // Get user profile
-    const userProfile = await db
-      .select({
-        id: users.id,
-        email: users.email,
-        name: users.name,
-        image: users.image,
-        createdAt: users.createdAt,
-      })
-      .from(users)
-      .where(eq(users.id, id))
-      .limit(1);
+    // Get user stats
+    const [recipeCount, collectionCount] = await Promise.all([
+      db
+        .select({ count: count() })
+        .from(recipes)
+        .where(eq(recipes.userId, userId))
+        .then((result) => result[0]?.count || 0),
 
-    if (!userProfile || userProfile.length === 0) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    }
+      db
+        .select({ count: count() })
+        .from(collections)
+        .where(eq(collections.userId, userId))
+        .then((result) => result[0]?.count || 0),
+    ]);
 
-    return NextResponse.json({
-      user: userProfile[0],
-    });
+    // Get recent recipes
+    const recentRecipes = await db
+      .select()
+      .from(recipes)
+      .where(eq(recipes.userId, userId))
+      .orderBy(desc(recipes.createdAt))
+      .limit(6);
+
+    const userProfile = {
+      id: userId,
+      stats: {
+        recipeCount,
+        collectionCount,
+        likesCount: 0, // Will be implemented when rating system is added
+        reviewsCount: 0, // Will be implemented when comment system is added
+        followersCount: 0, // Will be implemented when follow system is added
+        followingCount: 0, // Will be implemented when follow system is added
+      },
+      recentRecipes,
+    };
+
+    return NextResponse.json(userProfile);
   } catch (error) {
     console.error('Error fetching user profile:', error);
     return NextResponse.json(
