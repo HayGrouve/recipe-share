@@ -5,9 +5,6 @@ import {
   Clock,
   Users,
   ChefHat,
-  Heart,
-  Share2,
-  Bookmark,
   Star,
   ArrowLeft,
   Timer,
@@ -25,6 +22,8 @@ import { RecipeTagsCategories } from '@/components/recipes/recipe-tags-categorie
 import { RecipeRelated } from '@/components/recipes/recipe-related';
 import { RecipeRating } from '@/components/recipe/recipe-rating';
 import { RecipeComments } from '@/components/recipe/recipe-comments';
+import { SaveButton } from '@/components/ui/save-button';
+import { ShareButton } from '@/components/ui/share-button';
 
 interface RecipePageProps {
   params: Promise<{ id: string }>;
@@ -325,14 +324,13 @@ export default async function RecipePage({ params }: RecipePageProps) {
             </Link>
 
             <div className="flex items-center gap-3">
-              <Button variant="outline" size="sm">
-                <Share2 className="mr-2 h-4 w-4" />
-                Share
-              </Button>
-              <Button variant="outline" size="sm">
-                <Bookmark className="mr-2 h-4 w-4" />
-                Save
-              </Button>
+              <ShareButton
+                recipeId={recipe.id}
+                recipeTitle={recipe.title}
+                size="sm"
+                showText
+              />
+              <SaveButton recipeId={recipe.id} size="sm" showText />
             </div>
           </div>
         </div>
@@ -657,18 +655,23 @@ export default async function RecipePage({ params }: RecipePageProps) {
 
         {/* Action Buttons */}
         <div className="print-hidden mt-8 flex flex-wrap justify-center gap-4">
-          <Button size="lg" className="bg-blue-600 hover:bg-blue-700">
-            <Heart className="mr-2 h-5 w-5" />
-            Add to Favorites
-          </Button>
+          <SaveButton
+            recipeId={recipe.id}
+            size="lg"
+            variant="default"
+            className="bg-blue-600 hover:bg-blue-700"
+            showText
+          />
           <Button variant="outline" size="lg">
             <Star className="mr-2 h-5 w-5" />
             Rate Recipe
           </Button>
-          <Button variant="outline" size="lg">
-            <Share2 className="mr-2 h-5 w-5" />
-            Share Recipe
-          </Button>
+          <ShareButton
+            recipeId={recipe.id}
+            recipeTitle={recipe.title}
+            size="lg"
+            showText
+          />
           <Button
             variant="outline"
             size="lg"

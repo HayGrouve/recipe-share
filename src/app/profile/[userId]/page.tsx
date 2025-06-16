@@ -6,6 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton-loader';
 import { FollowButton } from '@/components/ui/follow-button';
 import { UserConnections } from '@/components/profile/user-connections';
 import { ActivityFeed } from '@/components/profile/activity-feed';
+import { SavedRecipes } from '@/components/profile/saved-recipes';
 
 interface Recipe {
   id: string;
@@ -123,8 +124,9 @@ async function ProfileContent({ userId }: { userId: string }) {
 
         {/* Profile Content Tabs */}
         <Tabs defaultValue="recipes" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="recipes">Recipes</TabsTrigger>
+            <TabsTrigger value="saved">Saved</TabsTrigger>
             <TabsTrigger value="collections">Collections</TabsTrigger>
             <TabsTrigger value="connections">Connections</TabsTrigger>
             <TabsTrigger value="activity">Activity</TabsTrigger>
@@ -162,6 +164,10 @@ async function ProfileContent({ userId }: { userId: string }) {
                 <p className="text-muted-foreground">No recipes yet...</p>
               )}
             </Card>
+          </TabsContent>
+
+          <TabsContent value="saved" className="mt-6">
+            <SavedRecipes userId={userId} />
           </TabsContent>
 
           <TabsContent value="collections" className="mt-6">
