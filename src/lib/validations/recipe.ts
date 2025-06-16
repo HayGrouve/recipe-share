@@ -67,9 +67,8 @@ const recipeFormBaseSchema = z.object({
   // Images (UploadThing returns URLs)
   images: z
     .array(z.string().url('Invalid image URL'))
-    .max(5, 'Maximum 5 images allowed')
-    .default([]),
-  primaryImageIndex: z.number().min(0).default(0),
+    .max(5, 'Maximum 5 images allowed'),
+  primaryImageIndex: z.number().min(0),
 
   // Ingredients
   ingredients: z
@@ -87,11 +86,10 @@ const recipeFormBaseSchema = z.object({
   nutrition: nutritionSchema,
 
   // Tags & Dietary
-  tags: z.array(z.string()).max(20, 'Maximum 20 tags allowed').default([]),
+  tags: z.array(z.string()).max(20, 'Maximum 20 tags allowed'),
   dietaryRestrictions: z
     .array(z.string())
-    .max(10, 'Maximum 10 dietary restrictions allowed')
-    .default([]),
+    .max(10, 'Maximum 10 dietary restrictions allowed'),
 });
 
 // Main recipe form schema with refinements

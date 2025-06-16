@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { Suspense } from 'react';
 import RecipeCreateForm from '@/components/recipes/recipe-create-form';
 
 export const metadata: Metadata = {
@@ -19,7 +20,15 @@ export default function CreateRecipePage() {
           </p>
         </div>
 
-        <RecipeCreateForm />
+        <Suspense
+          fallback={
+            <div className="flex h-64 items-center justify-center">
+              <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
+            </div>
+          }
+        >
+          <RecipeCreateForm />
+        </Suspense>
       </div>
     </div>
   );

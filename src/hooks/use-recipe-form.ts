@@ -7,6 +7,7 @@ import { RecipeFormData, recipeFormSchema } from '@/lib/validations/recipe';
 import {
   RecipeFormService,
   ApiResponse,
+  CreateRecipeResponse,
 } from '@/lib/services/recipe-form-service';
 
 export interface UseRecipeFormOptions {
@@ -186,7 +187,7 @@ export function useRecipeForm(
       setIsSubmitting(true);
 
       try {
-        let response: ApiResponse;
+        let response: ApiResponse<CreateRecipeResponse>;
 
         if (formMode === 'edit' && recipeId) {
           response = await RecipeFormService.updateRecipe(recipeId, data);
