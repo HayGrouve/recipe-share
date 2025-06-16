@@ -1,5 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Suppress hydration warnings caused by browser extensions
+  reactStrictMode: true,
+  experimental: {
+    optimizePackageImports: ['@uploadthing/react'],
+  },
   images: {
     remotePatterns: [
       {
@@ -29,6 +34,18 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'picsum.photos',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'utfs.io',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.ufs.sh',
         port: '',
         pathname: '/**',
       },

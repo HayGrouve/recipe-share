@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import IngredientsStep from './form-steps/ingredients-step';
+import ImagesStep from './form-steps/images-step';
 import {
   // recipeFormSchema, // TODO: Re-enable when type mismatch is fixed
   type RecipeFormData,
@@ -271,16 +272,7 @@ export default function RecipeCreateForm() {
           </div>
         );
       case 4:
-        return (
-          <div className="space-y-4">
-            <div className="text-center text-gray-500">
-              <p>Image Upload step content will be implemented next.</p>
-              <p className="mt-2 text-sm">
-                Drag & drop image upload with preview and primary selection.
-              </p>
-            </div>
-          </div>
-        );
+        return <ImagesStep />;
       case 5:
         return <IngredientsStep />;
       case 6:

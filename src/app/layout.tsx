@@ -37,6 +37,7 @@ export default function RootLayout({
       <html lang="en">
         <body
           className={`${inter.variable} ${playfairDisplay.variable} font-sans antialiased`}
+          suppressHydrationWarning={true}
         >
           <QueryProvider>
             <div className="flex min-h-screen flex-col">

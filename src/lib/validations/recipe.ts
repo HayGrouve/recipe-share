@@ -64,8 +64,11 @@ const recipeFormBaseSchema = z.object({
     required_error: 'Please select a difficulty level',
   }),
 
-  // Images (File objects will be handled separately in the component)
-  images: z.array(z.any()).default([]), // Files can't be validated with Zod directly
+  // Images (UploadThing returns URLs)
+  images: z
+    .array(z.string().url('Invalid image URL'))
+    .max(5, 'Maximum 5 images allowed')
+    .default([]),
   primaryImageIndex: z.number().min(0).default(0),
 
   // Ingredients
@@ -92,16 +95,28 @@ const recipeFormBaseSchema = z.object({
 });
 
 // Main recipe form schema with refinements
-export const recipeFormSchema = recipeFormBaseSchema.refine(
-  (data) => {
-    // Custom validation: total time should be at least prep + cook time
-    return data.totalTime >= data.prepTime + data.cookTime;
-  },
-  {
-    message: 'Total time must be at least prep time + cook time',
-    path: ['totalTime'],
-  }
-);
+export const recipeFormSchema = recipeFormBaseSchema
+  .refine(
+    (data) => {
+      // Custom validation: total time should be at least prep + cook time
+      return data.totalTime >= data.prepTime + data.cookTime;
+    },
+    {
+      message: 'Total time must be at least prep time + cook time',
+      path: ['totalTime'],
+    }
+  )
+  .refine(
+    (data) => {
+      // Custom validation: primary image index should be valid
+      if (data.images.length === 0) return true; // No validation needed if no images
+      return data.primaryImageIndex < data.images.length;
+    },
+    {
+      message: 'Primary image index is invalid',
+      path: ['primaryImageIndex'],
+    }
+  );
 
 // Step-specific schemas for individual step validation (using base schema)
 export const basicInfoSchema = recipeFormBaseSchema.pick({
@@ -132,6 +147,11 @@ export const servingsSchema = recipeFormBaseSchema.pick({
   difficulty: true,
 });
 
+export const imagesSchema = recipeFormBaseSchema.pick({
+  images: true,
+  primaryImageIndex: true,
+});
+
 export const ingredientsSchema = recipeFormBaseSchema.pick({
   ingredients: true,
 });
@@ -158,6 +178,7 @@ export type NutritionData = z.infer<typeof nutritionSchema>;
 export type BasicInfoData = z.infer<typeof basicInfoSchema>;
 export type TimingData = z.infer<typeof timingSchema>;
 export type ServingsData = z.infer<typeof servingsSchema>;
+export type ImagesData = z.infer<typeof imagesSchema>;
 export type IngredientsData = z.infer<typeof ingredientsSchema>;
 export type InstructionsData = z.infer<typeof instructionsSchema>;
 export type NutritionStepData = z.infer<typeof nutritionStepSchema>;
