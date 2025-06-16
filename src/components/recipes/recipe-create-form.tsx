@@ -20,6 +20,7 @@ import IngredientsStep from './form-steps/ingredients-step';
 import ImagesStep from './form-steps/images-step';
 import InstructionsStep from './form-steps/instructions-step';
 import DeleteConfirmationModal from './delete-confirmation-modal';
+import { RecipePreview } from './recipe-preview';
 import { useRecipeForm } from '@/hooks/use-recipe-form';
 import { type RecipeFormData } from '@/lib/validations/recipe';
 
@@ -33,24 +34,26 @@ interface FormStep {
 
 export default function RecipeCreateForm() {
   const [currentStep, setCurrentStep] = useState(1);
-  const [previewMode, setPreviewMode] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isPreviewMode, setIsPreviewMode] = useState(false);
 
-  // Use the custom recipe form hook
   const {
     form,
+    handleSubmit: onSubmit,
+    handleSaveAsDraft,
+    handleDelete,
+    handleDuplicate,
     isSubmitting,
     isDraft,
     formMode,
     recipeId,
     isLoading,
-    handleSubmit,
-    handleSaveAsDraft,
-    handleDelete,
-    handleDuplicate,
     hasUnsavedChanges,
     lastSavedAt,
-  } = useRecipeForm();
+  } = useRecipeForm({
+    autoSave: true,
+    autoSaveInterval: 30000, // 30 seconds
+  });
 
   const {
     formState: { errors },
@@ -188,10 +191,6 @@ export default function RecipeCreateForm() {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
     }
-  };
-
-  const onSubmit = async (data: RecipeFormData) => {
-    await handleSubmit(data);
   };
 
   const progressPercentage =
@@ -352,15 +351,15 @@ export default function RecipeCreateForm() {
             <Button
               type="button"
               variant="outline"
-              onClick={() => setPreviewMode(!previewMode)}
+              onClick={() => setIsPreviewMode(!isPreviewMode)}
               aria-label={
-                previewMode ? 'Return to editing mode' : 'Preview recipe'
+                isPreviewMode ? 'Return to editing mode' : 'Preview recipe'
               }
-              aria-pressed={previewMode}
+              aria-pressed={isPreviewMode}
               className="flex min-h-[44px] items-center gap-2"
             >
               <Eye className="h-4 w-4" aria-hidden="true" />
-              <span>{previewMode ? 'Edit' : 'Preview'}</span>
+              <span>{isPreviewMode ? 'Edit' : 'Preview'}</span>
             </Button>
           </div>
         </div>
@@ -423,107 +422,117 @@ export default function RecipeCreateForm() {
           </div>
         </nav>
 
-        {/* Form Content */}
-        <Card>
-          <CardContent className="p-6">
-            <form onSubmit={form.handleSubmit(onSubmit)}>
-              {/* Current Step Header */}
-              <div className="mb-6">
-                <h2 className="text-xl font-semibold text-gray-900">
-                  Step {currentStep}: {steps[currentStep - 1]?.title}
-                </h2>
-                <p className="mt-1 text-gray-600">
-                  {steps[currentStep - 1]?.description}
-                </p>
+        {/* Main Content */}
+        {isPreviewMode ? (
+          /* Preview Mode */
+          <Card>
+            <CardContent className="p-6">
+              <RecipePreview formData={watchedValues as RecipeFormData} />
+            </CardContent>
+          </Card>
+        ) : (
+          /* Form Mode */
+          <Card>
+            <CardContent className="p-6">
+              <form onSubmit={form.handleSubmit(onSubmit)}>
+                {/* Current Step Header */}
+                <div className="mb-6">
+                  <h2 className="text-xl font-semibold text-gray-900">
+                    Step {currentStep}: {steps[currentStep - 1]?.title}
+                  </h2>
+                  <p className="mt-1 text-gray-600">
+                    {steps[currentStep - 1]?.description}
+                  </p>
 
-                {/* Show validation errors for current step */}
-                {Object.keys(errors).length > 0 && (
-                  <div
-                    id="form-errors"
-                    role="alert"
-                    aria-live="polite"
-                    className="mt-3 rounded-md border border-red-200 bg-red-50 p-3"
-                  >
-                    <div className="flex items-center gap-2 text-red-800">
-                      <AlertCircle className="h-4 w-4" aria-hidden="true" />
-                      <span className="font-medium">
-                        Please fix the following errors:
-                      </span>
+                  {/* Show validation errors for current step */}
+                  {Object.keys(errors).length > 0 && (
+                    <div
+                      id="form-errors"
+                      role="alert"
+                      aria-live="polite"
+                      className="mt-3 rounded-md border border-red-200 bg-red-50 p-3"
+                    >
+                      <div className="flex items-center gap-2 text-red-800">
+                        <AlertCircle className="h-4 w-4" aria-hidden="true" />
+                        <span className="font-medium">
+                          Please fix the following errors:
+                        </span>
+                      </div>
+                      <ul className="mt-2 list-inside list-disc text-sm text-red-700">
+                        {errors.title && <li>Recipe title is required</li>}
+                        {errors.description && (
+                          <li>Recipe description is required</li>
+                        )}
+                        {errors.instructions && (
+                          <li>Cooking instructions are required</li>
+                        )}
+                        {errors.ingredients && (
+                          <li>
+                            Please check your ingredients for missing or invalid
+                            information
+                          </li>
+                        )}
+                        {errors.prepTime && (
+                          <li>Preparation time must be a valid number</li>
+                        )}
+                        {errors.cookTime && (
+                          <li>Cooking time must be a valid number</li>
+                        )}
+                        {errors.servings && (
+                          <li>Number of servings must be a valid number</li>
+                        )}
+                      </ul>
                     </div>
-                    <ul className="mt-2 list-inside list-disc text-sm text-red-700">
-                      {errors.title && <li>Recipe title is required</li>}
-                      {errors.description && (
-                        <li>Recipe description is required</li>
-                      )}
-                      {errors.instructions && (
-                        <li>Cooking instructions are required</li>
-                      )}
-                      {errors.ingredients && (
-                        <li>
-                          Please check your ingredients for missing or invalid
-                          information
-                        </li>
-                      )}
-                      {errors.prepTime && (
-                        <li>Preparation time must be a valid number</li>
-                      )}
-                      {errors.cookTime && (
-                        <li>Cooking time must be a valid number</li>
-                      )}
-                      {errors.servings && (
-                        <li>Number of servings must be a valid number</li>
-                      )}
-                    </ul>
-                  </div>
-                )}
-              </div>
-
-              {/* Step Content */}
-              <div className="min-h-[400px]">{renderStepContent()}</div>
-
-              {/* Navigation Buttons */}
-              <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:justify-between">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={prevStep}
-                  disabled={currentStep === 1 || isSubmitting}
-                  aria-label={`Go to previous step: ${steps[currentStep - 2]?.title || 'Previous step'}`}
-                  className="order-2 flex min-h-[44px] items-center justify-center gap-2 sm:order-1"
-                >
-                  <ChevronLeft className="h-4 w-4" aria-hidden="true" />
-                  Previous
-                </Button>
-
-                <div className="order-1 flex gap-2 sm:order-2">
-                  {currentStep === steps.length ? (
-                    <Button
-                      type="submit"
-                      disabled={!isFormValid || isSubmitting}
-                      aria-describedby={
-                        !isFormValid ? 'form-errors' : undefined
-                      }
-                      className="flex min-h-[44px] flex-1 items-center gap-2 sm:flex-initial"
-                    >
-                      <Save className="h-4 w-4" aria-hidden="true" />
-                      {isSubmitting ? 'Publishing...' : 'Publish Recipe'}
-                    </Button>
-                  ) : (
-                    <Button
-                      type="button"
-                      onClick={nextStep}
-                      aria-label={`Go to next step: ${steps[currentStep]?.title || 'Next step'}`}
-                      className="flex min-h-[44px] flex-1 items-center gap-2 sm:flex-initial"
-                    >
-                      Next
-                      <ChevronRight className="h-4 w-4" aria-hidden="true" />
-                    </Button>
                   )}
                 </div>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
+
+                {/* Step Content */}
+                <div className="min-h-[400px]">{renderStepContent()}</div>
+
+                {/* Navigation Buttons */}
+                <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:justify-between">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={prevStep}
+                    disabled={currentStep === 1 || isSubmitting}
+                    aria-label={`Go to previous step: ${steps[currentStep - 2]?.title || 'Previous step'}`}
+                    className="order-2 flex min-h-[44px] items-center justify-center gap-2 sm:order-1"
+                  >
+                    <ChevronLeft className="h-4 w-4" aria-hidden="true" />
+                    Previous
+                  </Button>
+
+                  <div className="order-1 flex gap-2 sm:order-2">
+                    {currentStep === steps.length ? (
+                      <Button
+                        type="submit"
+                        disabled={!isFormValid || isSubmitting}
+                        aria-describedby={
+                          !isFormValid ? 'form-errors' : undefined
+                        }
+                        className="flex min-h-[44px] flex-1 items-center gap-2 sm:flex-initial"
+                      >
+                        <Save className="h-4 w-4" aria-hidden="true" />
+                        {isSubmitting ? 'Publishing...' : 'Publish Recipe'}
+                      </Button>
+                    ) : (
+                      <Button
+                        type="button"
+                        onClick={nextStep}
+                        aria-label={`Go to next step: ${steps[currentStep]?.title || 'Next step'}`}
+                        className="flex min-h-[44px] flex-1 items-center gap-2 sm:flex-initial"
+                      >
+                        Next
+                        <ChevronRight className="h-4 w-4" aria-hidden="true" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Debug Info (Development only) */}
         {process.env.NODE_ENV === 'development' && (
