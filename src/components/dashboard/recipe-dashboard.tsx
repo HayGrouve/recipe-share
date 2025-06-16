@@ -40,6 +40,7 @@ import {
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import CollectionsSection from './collections-section';
+import AnalyticsSection from './analytics-section';
 
 interface Recipe {
   id: string;
@@ -646,6 +647,7 @@ export function RecipeDashboard() {
         <TabsList>
           <TabsTrigger value="recipes">Recipes</TabsTrigger>
           <TabsTrigger value="collections">Collections</TabsTrigger>
+          <TabsTrigger value="analytics">Analytics</TabsTrigger>
         </TabsList>
 
         <TabsContent value="recipes" className="space-y-4">
@@ -856,6 +858,10 @@ export function RecipeDashboard() {
 
         <TabsContent value="collections">
           <CollectionsSection viewMode={viewMode} />
+        </TabsContent>
+
+        <TabsContent value="analytics">
+          <AnalyticsSection />
         </TabsContent>
       </Tabs>
     </div>
