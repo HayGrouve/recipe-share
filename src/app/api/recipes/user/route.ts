@@ -1,18 +1,15 @@
 import { NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
 import { db } from '@/lib/db';
 import { recipes } from '@haygrouve/db-schema';
 import { eq, desc } from 'drizzle-orm';
+import { getUserId } from '@/lib/auth';
 
 export async function GET() {
   try {
-    const { userId } = await auth();
+    // Get user's Clerk ID for querying recipes
+    const userId = await getUserId();
 
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    // Fetch user's recipes using simple select pattern like in recipes/route.ts
+    // Fetch user's recipes using Clerk ID directly
     const userRecipes = await db
       .select()
       .from(recipes)

@@ -1,25 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { eq, desc } from 'drizzle-orm';
 import { db, collections } from '@/lib/db';
-import { getAuthenticatedUser } from '@/lib/auth';
+import { getUserId } from '@/lib/auth';
 
 // GET /api/collections - Get user's collections
 export async function GET() {
   try {
-    const user = await getAuthenticatedUser();
+    // Get user's Clerk ID for querying collections
+    const userId = await getUserId();
 
-    if (!user) {
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
-      );
-    }
-
-    // Get user's collections (simplified approach similar to user recipes)
+    // Get user's collections using Clerk ID directly
     const userCollections = await db
       .select()
       .from(collections)
-      .where(eq(collections.userId, user.id))
+      .where(eq(collections.userId, userId))
       .orderBy(desc(collections.createdAt));
 
     // Format collections for frontend (simplified for now)
@@ -45,14 +39,8 @@ export async function GET() {
 // POST /api/collections - Create new collection
 export async function POST(request: NextRequest) {
   try {
-    const user = await getAuthenticatedUser();
-
-    if (!user) {
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
-      );
-    }
+    // Get user's Clerk ID for collection creation
+    const userId = await getUserId();
 
     const body = await request.json();
     const { name, description } = body;
@@ -78,7 +66,7 @@ export async function POST(request: NextRequest) {
       .values({
         name: name.trim(),
         description: description?.trim() || null,
-        userId: user.id,
+        userId: userId,
       })
       .returning();
 

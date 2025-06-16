@@ -13,7 +13,7 @@ import {
   recipeImages,
   nutrition,
 } from '@/lib/db';
-import { getAuthenticatedUser } from '@/lib/auth';
+import { getUserId } from '@/lib/auth';
 
 interface RecipeFilters {
   category?: string;
@@ -143,15 +143,8 @@ export async function GET(request: NextRequest) {
 // POST /api/recipes - Create new recipe
 export async function POST(request: NextRequest) {
   try {
-    // Get authenticated user
-    const user = await getAuthenticatedUser();
-
-    if (!user) {
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
-      );
-    }
+    // Get user's Clerk ID for recipe creation
+    const userId = await getUserId();
 
     const body = await request.json();
     const {
@@ -190,7 +183,7 @@ export async function POST(request: NextRequest) {
           cookTime: cookTime || 0,
           servings: servings || 1,
           isPublished,
-          userId: user.id,
+          userId: userId,
         })
         .returning();
 

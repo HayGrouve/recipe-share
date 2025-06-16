@@ -88,3 +88,12 @@ export function formatUserDisplayName(user: {
 
   return user.email || 'Anonymous User';
 }
+
+/**
+ * Get the authenticated user's Clerk ID for use as user ID in recipes/collections
+ * Since we're using Clerk IDs directly as foreign keys, no database sync needed
+ */
+export async function getUserId() {
+  const user = await getAuthenticatedUser();
+  return user.id;
+}

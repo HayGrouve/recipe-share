@@ -32,6 +32,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { CollectionSharingTrigger } from './collection-sharing';
 
 interface Collection {
   id: string;
@@ -285,6 +286,11 @@ export default function CollectionsSection({
               <Edit className="mr-2 h-4 w-4" />
               Edit
             </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <div className="w-full">
+                <CollectionSharingTrigger collection={collection} />
+              </div>
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={() => openDeleteDialog(collection)}
@@ -353,6 +359,11 @@ export default function CollectionsSection({
                 <DropdownMenuItem onClick={() => openEditDialog(collection)}>
                   <Edit className="mr-2 h-4 w-4" />
                   Edit
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <div className="w-full">
+                    <CollectionSharingTrigger collection={collection} />
+                  </div>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
