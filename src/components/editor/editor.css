@@ -1,0 +1,237 @@
+/* Tiptap Editor Styles */
+.ProseMirror {
+  outline: none;
+  padding: 1rem;
+  min-height: 200px;
+}
+
+.ProseMirror p {
+  margin: 0.5rem 0;
+  line-height: 1.6;
+}
+
+.ProseMirror p:first-child {
+  margin-top: 0;
+}
+
+.ProseMirror p:last-child {
+  margin-bottom: 0;
+}
+
+.ProseMirror h1,
+.ProseMirror h2,
+.ProseMirror h3,
+.ProseMirror h4,
+.ProseMirror h5,
+.ProseMirror h6 {
+  font-weight: 600;
+  margin: 1.5rem 0 0.5rem 0;
+  line-height: 1.4;
+}
+
+.ProseMirror h1 {
+  font-size: 1.875rem;
+}
+
+.ProseMirror h2 {
+  font-size: 1.5rem;
+}
+
+.ProseMirror h3 {
+  font-size: 1.25rem;
+}
+
+.ProseMirror strong {
+  font-weight: 600;
+}
+
+.ProseMirror em {
+  font-style: italic;
+}
+
+/* List Styles */
+.ProseMirror .tiptap-bullet-list,
+.ProseMirror .tiptap-ordered-list {
+  margin: 0.5rem 0;
+  padding-left: 1.5rem;
+}
+
+.ProseMirror .tiptap-bullet-list {
+  list-style-type: disc;
+}
+
+.ProseMirror .tiptap-ordered-list {
+  list-style-type: decimal;
+}
+
+.ProseMirror .tiptap-list-item {
+  margin: 0.25rem 0;
+  line-height: 1.6;
+}
+
+.ProseMirror .tiptap-list-item p {
+  margin: 0;
+}
+
+/* Nested Lists */
+.ProseMirror .tiptap-bullet-list .tiptap-bullet-list {
+  list-style-type: circle;
+  margin: 0.25rem 0;
+}
+
+.ProseMirror .tiptap-bullet-list .tiptap-bullet-list .tiptap-bullet-list {
+  list-style-type: square;
+}
+
+/* Link Styles */
+.ProseMirror .tiptap-link {
+  color: #2563eb;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.ProseMirror .tiptap-link:hover {
+  color: #1d4ed8;
+}
+
+/* Image Styles */
+.ProseMirror .tiptap-image {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1rem auto;
+  border-radius: 0.5rem;
+  box-shadow:
+    0 1px 3px 0 rgba(0, 0, 0, 0.1),
+    0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+/* Placeholder Styles */
+.ProseMirror p.is-editor-empty:first-child::before {
+  color: #9ca3af;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+/* Focus Styles */
+.ProseMirror:focus {
+  outline: none;
+}
+
+/* Recipe-specific styles for ingredients and instructions */
+.ProseMirror .recipe-ingredient {
+  background-color: #fef3c7;
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-weight: 500;
+}
+
+.ProseMirror .recipe-instruction-step {
+  counter-increment: step-counter;
+  position: relative;
+  padding-left: 2rem;
+  margin: 1rem 0;
+}
+
+.ProseMirror .recipe-instruction-step::before {
+  content: counter(step-counter);
+  position: absolute;
+  left: 0;
+  top: 0;
+  background-color: #3b82f6;
+  color: white;
+  border-radius: 50%;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+/* Selection Styles */
+.ProseMirror ::selection {
+  background-color: #dbeafe;
+}
+
+.ProseMirror::-moz-selection {
+  background-color: #dbeafe;
+}
+
+/* Blockquote Styles */
+.ProseMirror blockquote {
+  border-left: 4px solid #e5e7eb;
+  padding-left: 1rem;
+  margin: 1rem 0;
+  font-style: italic;
+  color: #6b7280;
+}
+
+/* Code Styles */
+.ProseMirror code {
+  background-color: #f3f4f6;
+  color: #1f2937;
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-family:
+    ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Monaco, Consolas,
+    'Liberation Mono', 'Courier New', monospace;
+  font-size: 0.875em;
+}
+
+.ProseMirror pre {
+  background-color: #1f2937;
+  color: #f9fafb;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+  overflow-x: auto;
+}
+
+.ProseMirror pre code {
+  background-color: transparent;
+  color: inherit;
+  padding: 0;
+  border-radius: 0;
+}
+
+/* Table Styles (if needed) */
+.ProseMirror table {
+  border-collapse: collapse;
+  margin: 1rem 0;
+  width: 100%;
+}
+
+.ProseMirror table td,
+.ProseMirror table th {
+  border: 1px solid #e5e7eb;
+  padding: 0.5rem;
+  text-align: left;
+}
+
+.ProseMirror table th {
+  background-color: #f9fafb;
+  font-weight: 600;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .ProseMirror {
+    padding: 0.75rem;
+  }
+
+  .ProseMirror h1 {
+    font-size: 1.5rem;
+  }
+
+  .ProseMirror h2 {
+    font-size: 1.25rem;
+  }
+
+  .ProseMirror h3 {
+    font-size: 1.125rem;
+  }
+}
