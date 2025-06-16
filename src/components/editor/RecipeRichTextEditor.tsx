@@ -155,8 +155,10 @@ export const RecipeRichTextEditor = ({
 
   // Update ingredients highlighting when ingredients change
   useEffect(() => {
-    if (editor && ingredients) {
-      editor.commands.updateIngredients(ingredients);
+    if (editor && ingredients && ingredients.length > 0) {
+      // For now, we'll skip the ingredient highlighting feature
+      // This can be implemented later with a custom TipTap extension
+      // TODO: Implement ingredient highlighting extension
     }
   }, [editor, ingredients]);
 
