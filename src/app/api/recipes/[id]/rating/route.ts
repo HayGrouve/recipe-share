@@ -1,70 +1,181 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAuthenticatedUser } from '@/lib/auth';
+import { db } from '@/lib/db';
+import { ratings } from '@haygrouve/db-schema';
+import { eq, avg, count, and } from 'drizzle-orm';
+import { getUserId } from '@/lib/auth';
 
-// POST /api/recipes/[id]/rating - Rate a recipe
-export async function POST(
-  request: NextRequest,
-  context: { params: Promise<{ id: string }> }
-) {
+interface RouteParams {
+  params: Promise<{ id: string }>;
+}
+
+// GET /api/recipes/[id]/rating - Get recipe ratings and user's rating
+export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
-    const user = await getAuthenticatedUser();
+    const { id: recipeId } = await params;
 
-    if (!user) {
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
-      );
-    }
-
-    const { id } = await context.params;
-    const { rating } = await request.json();
-
-    if (!id) {
+    if (!recipeId) {
       return NextResponse.json(
         { error: 'Recipe ID is required' },
         { status: 400 }
       );
     }
 
-    if (!rating || typeof rating !== 'number' || rating < 1 || rating > 5) {
+    // Get aggregated rating data
+    const ratingStats = await db
+      .select({
+        averageRating: avg(ratings.rating),
+        totalRatings: count(ratings.id),
+      })
+      .from(ratings)
+      .where(eq(ratings.recipeId, recipeId));
+
+    const stats = ratingStats[0] || { averageRating: 0, totalRatings: 0 };
+
+    // Get rating distribution (1-5 stars)
+    const distribution = await Promise.all([
+      db
+        .select({ count: count() })
+        .from(ratings)
+        .where(and(eq(ratings.recipeId, recipeId), eq(ratings.rating, 1)))
+        .then((r) => r[0]?.count || 0),
+      db
+        .select({ count: count() })
+        .from(ratings)
+        .where(and(eq(ratings.recipeId, recipeId), eq(ratings.rating, 2)))
+        .then((r) => r[0]?.count || 0),
+      db
+        .select({ count: count() })
+        .from(ratings)
+        .where(and(eq(ratings.recipeId, recipeId), eq(ratings.rating, 3)))
+        .then((r) => r[0]?.count || 0),
+      db
+        .select({ count: count() })
+        .from(ratings)
+        .where(and(eq(ratings.recipeId, recipeId), eq(ratings.rating, 4)))
+        .then((r) => r[0]?.count || 0),
+      db
+        .select({ count: count() })
+        .from(ratings)
+        .where(and(eq(ratings.recipeId, recipeId), eq(ratings.rating, 5)))
+        .then((r) => r[0]?.count || 0),
+    ]);
+
+    // Try to get current user's rating (if authenticated)
+    let userRating = null;
+    try {
+      const userId = await getUserId();
+      if (userId) {
+        const userRatingResult = await db
+          .select()
+          .from(ratings)
+          .where(
+            and(eq(ratings.recipeId, recipeId), eq(ratings.userId, userId))
+          )
+          .limit(1);
+
+        userRating = userRatingResult[0] || null;
+      }
+    } catch {
+      // User not authenticated, which is fine
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        averageRating: Number(stats.averageRating) || 0,
+        totalRatings: stats.totalRatings || 0,
+        distribution: {
+          1: distribution[0],
+          2: distribution[1],
+          3: distribution[2],
+          4: distribution[3],
+          5: distribution[4],
+        },
+        userRating: userRating
+          ? {
+              rating: userRating.rating,
+              comment: userRating.comment,
+              createdAt: userRating.createdAt,
+            }
+          : null,
+      },
+    });
+  } catch (error) {
+    console.error('Error fetching recipe ratings:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch recipe ratings', success: false },
+      { status: 500 }
+    );
+  }
+}
+
+// POST /api/recipes/[id]/rating - Submit or update a rating
+export async function POST(request: NextRequest, { params }: RouteParams) {
+  try {
+    const { id: recipeId } = await params;
+    const userId = await getUserId();
+
+    if (!recipeId) {
       return NextResponse.json(
-        { error: 'Rating must be a number between 1 and 5' },
+        { error: 'Recipe ID is required' },
         { status: 400 }
       );
     }
 
-    // Mock rating response since we're avoiding database type issues for now
-    const mockRatingResult = {
-      rating: rating,
-      userId: user.id,
-      recipeId: id,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      // Mock updated recipe stats
-      recipeStats: {
-        averageRating: 4.3,
-        totalRatings: 127,
-        ratingDistribution: {
-          5: 68,
-          4: 35,
-          3: 15,
-          2: 6,
-          1: 3,
-        },
-      },
-    };
+    const body = await request.json();
+    const { rating, comment } = body;
 
-    return NextResponse.json(
-      {
-        rating: mockRatingResult,
-        message: 'Rating submitted successfully',
-      },
-      { status: 201 }
-    );
+    // Validate rating
+    if (!rating || rating < 1 || rating > 5) {
+      return NextResponse.json(
+        { error: 'Rating must be between 1 and 5' },
+        { status: 400 }
+      );
+    }
+
+    // Check if user already rated this recipe
+    const existingRating = await db
+      .select()
+      .from(ratings)
+      .where(and(eq(ratings.recipeId, recipeId), eq(ratings.userId, userId)))
+      .limit(1);
+
+    let result;
+    if (existingRating.length > 0) {
+      // Update existing rating
+      result = await db
+        .update(ratings)
+        .set({
+          rating,
+          comment: comment || null,
+        })
+        .where(and(eq(ratings.recipeId, recipeId), eq(ratings.userId, userId)))
+        .returning();
+    } else {
+      // Create new rating
+      result = await db
+        .insert(ratings)
+        .values({
+          recipeId,
+          userId,
+          rating,
+          comment: comment || null,
+        })
+        .returning();
+    }
+
+    return NextResponse.json({
+      success: true,
+      message:
+        existingRating.length > 0
+          ? 'Rating updated successfully'
+          : 'Rating submitted successfully',
+      data: result[0],
+    });
   } catch (error) {
     console.error('Error submitting rating:', error);
     return NextResponse.json(
-      { error: 'Failed to submit rating' },
+      { error: 'Failed to submit rating', success: false },
       { status: 500 }
     );
   }

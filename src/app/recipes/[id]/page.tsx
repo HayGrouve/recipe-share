@@ -21,8 +21,10 @@ import { RecipeIngredients } from '@/components/recipes/recipe-ingredients';
 import { RecipeInstructions } from '@/components/recipes/recipe-instructions';
 import { RecipeNutrition } from '@/components/recipes/recipe-nutrition';
 import { RecipeTagsCategories } from '@/components/recipes/recipe-tags-categories';
-import { RecipeInteractions } from '@/components/recipes/recipe-interactions';
+
 import { RecipeRelated } from '@/components/recipes/recipe-related';
+import { RecipeRating } from '@/components/recipe/recipe-rating';
+import { RecipeComments } from '@/components/recipe/recipe-comments';
 
 interface RecipePageProps {
   params: Promise<{ id: string }>;
@@ -307,85 +309,6 @@ export default async function RecipePage({ params }: RecipePageProps) {
       createdAt: '2024-01-08T14:20:00Z',
     },
   ];
-
-  // Sample interaction data
-  const sampleComments = [
-    {
-      id: '1',
-      userId: 'user1',
-      userName: 'Sarah Johnson',
-      userAvatar: '/avatars/sarah.jpg',
-      content:
-        'These pancakes turned out amazing! My kids absolutely loved them. I added some blueberries and they were perfect.',
-      createdAt: '2024-01-15T09:30:00Z',
-      likes: 12,
-      dislikes: 0,
-      replies: [
-        {
-          id: '1-1',
-          userId: 'user2',
-          userName: 'Mike Chen',
-          content:
-            'Blueberry addition sounds great! Did you add them fresh or frozen?',
-          createdAt: '2024-01-15T10:15:00Z',
-          likes: 3,
-          dislikes: 0,
-        },
-      ],
-    },
-    {
-      id: '2',
-      userId: 'user3',
-      userName: 'Emma Wilson',
-      content:
-        'Perfect recipe for weekend brunch! The batter consistency was just right and they cooked evenly. Will definitely make again.',
-      createdAt: '2024-01-14T14:20:00Z',
-      likes: 8,
-      dislikes: 0,
-    },
-    {
-      id: '3',
-      userId: 'user4',
-      userName: 'David Brown',
-      content:
-        'Good recipe overall, but I found them a bit too sweet for my taste. Next time I will reduce the sugar by half.',
-      createdAt: '2024-01-13T11:45:00Z',
-      likes: 5,
-      dislikes: 1,
-    },
-  ];
-
-  const userInteraction = {
-    isSaved: false,
-    isLiked: true,
-    userRating: undefined, // No rating yet
-  };
-
-  // Handler functions for interactions
-  const handleRate = (rating: number, comment?: string) => {
-    console.log('Rating submitted:', rating, comment);
-    // This would typically send to API
-  };
-
-  const handleComment = (content: string, parentId?: string) => {
-    console.log('Comment submitted:', content, parentId);
-    // This would typically send to API
-  };
-
-  const handleSave = () => {
-    console.log('Recipe saved/unsaved');
-    // This would typically toggle save status via API
-  };
-
-  const handleLike = () => {
-    console.log('Recipe liked/unliked');
-    // This would typically toggle like status via API
-  };
-
-  const handleShare = () => {
-    console.log('Recipe shared');
-    // This would typically open share dialog or copy URL
-  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -726,21 +649,11 @@ export default async function RecipePage({ params }: RecipePageProps) {
           className="mb-8"
         />
 
-        {/* User Interactions Section */}
-        <RecipeInteractions
-          averageRating={4.3}
-          totalRatings={127}
-          totalSaves={89}
-          totalLikes={156}
-          comments={sampleComments}
-          userInteraction={userInteraction}
-          onRate={handleRate}
-          onComment={handleComment}
-          onSave={handleSave}
-          onLike={handleLike}
-          onShare={handleShare}
-          className="mb-8"
-        />
+        {/* Rating and Comments Section */}
+        <div className="mb-8 grid grid-cols-1 gap-8 lg:grid-cols-2">
+          <RecipeRating recipeId={recipe.id} />
+          <RecipeComments recipeId={recipe.id} />
+        </div>
 
         {/* Action Buttons */}
         <div className="print-hidden mt-8 flex flex-wrap justify-center gap-4">
