@@ -17,6 +17,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { RecipeIngredients } from '@/components/recipes/recipe-ingredients';
+import { RecipeInstructions } from '@/components/recipes/recipe-instructions';
+import { RecipeNutrition } from '@/components/recipes/recipe-nutrition';
 
 interface RecipePageProps {
   params: Promise<{ id: string }>;
@@ -382,17 +384,83 @@ export default async function RecipePage({ params }: RecipePageProps) {
         />
 
         {/* Instructions Section */}
-        <Card>
-          <CardContent className="p-6">
-            <h2 className="mb-6 text-2xl font-bold text-gray-900">
-              Instructions
-            </h2>
-            <div
-              className="prose prose-lg max-w-none"
-              dangerouslySetInnerHTML={{ __html: recipe.instructions }}
-            />
-          </CardContent>
-        </Card>
+        <RecipeInstructions
+          instructions={[
+            {
+              id: 'step-1',
+              stepNumber: 1,
+              instruction:
+                'In a large mixing bowl, whisk together flour, baking powder, salt, and sugar (if using).',
+              tips: 'Make sure to sift the flour for lighter pancakes.',
+            },
+            {
+              id: 'step-2',
+              stepNumber: 2,
+              instruction:
+                'In another bowl, beat the eggs and then whisk in the milk and melted butter.',
+              temperature: '350°F oven',
+            },
+            {
+              id: 'step-3',
+              stepNumber: 3,
+              instruction:
+                'Pour the wet ingredients into the dry ingredients and stir until just combined. Do not overmix - a few lumps are okay.',
+              tips: 'Overmixing will result in tough, dense pancakes. The batter should be slightly lumpy.',
+            },
+            {
+              id: 'step-4',
+              stepNumber: 4,
+              instruction:
+                'Heat a non-stick pan or griddle over medium heat. Lightly grease with butter or oil.',
+              timerMinutes: 2,
+            },
+            {
+              id: 'step-5',
+              stepNumber: 5,
+              instruction:
+                'Pour 1/4 cup of batter for each pancake onto the hot griddle. Cook until bubbles form on the surface and edges look set, about 2-3 minutes.',
+              timerMinutes: 3,
+              tips: 'Wait for bubbles to form and pop before flipping - this ensures the pancake is ready.',
+            },
+            {
+              id: 'step-6',
+              stepNumber: 6,
+              instruction:
+                'Flip carefully with a spatula and cook for another 1-2 minutes until golden brown on the bottom.',
+              timerMinutes: 2,
+            },
+            {
+              id: 'step-7',
+              stepNumber: 7,
+              instruction:
+                'Transfer to a warm plate and repeat with remaining batter. Serve immediately with your favorite toppings.',
+              tips: 'Keep finished pancakes warm in a 200°F oven while cooking the rest.',
+            },
+          ]}
+          className="mb-8"
+        />
+
+        {/* Nutrition Section */}
+        <RecipeNutrition
+          nutrition={{
+            calories: 320,
+            protein: 12.5,
+            carbs: 45.2,
+            fat: 8.3,
+            fiber: 3.1,
+            sugar: 8.7,
+            sodium: 420,
+            cholesterol: 95,
+            saturatedFat: 3.2,
+            transFat: 0.1,
+            vitaminA: 15,
+            vitaminC: 8,
+            calcium: 25,
+            iron: 12,
+          }}
+          servings={recipe.servings || 4}
+          className="mb-8"
+        />
 
         {/* Action Buttons */}
         <div className="mt-8 flex flex-wrap justify-center gap-4">
