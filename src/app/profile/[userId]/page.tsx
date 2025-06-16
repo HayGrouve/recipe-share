@@ -3,6 +3,9 @@ import { Suspense } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton-loader';
+import { FollowButton } from '@/components/ui/follow-button';
+import { UserConnections } from '@/components/profile/user-connections';
+import { ActivityFeed } from '@/components/profile/activity-feed';
 
 interface Recipe {
   id: string;
@@ -45,6 +48,10 @@ async function ProfileContent({ userId }: { userId: string }) {
   };
 
   const recentRecipes = userProfile?.recentRecipes || [];
+  const userName =
+    userProfile?.firstName || userProfile?.lastName
+      ? `${userProfile.firstName || ''} ${userProfile.lastName || ''}`.trim()
+      : userProfile?.username || 'Anonymous User';
 
   return (
     <div className="container mx-auto max-w-6xl px-4 py-8">
@@ -54,13 +61,23 @@ async function ProfileContent({ userId }: { userId: string }) {
           <div className="flex items-start gap-6">
             <div className="flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-orange-400 to-orange-600">
               <span className="text-2xl font-bold text-white">
-                {userId.charAt(0).toUpperCase()}
+                {userName.charAt(0).toUpperCase()}
               </span>
             </div>
             <div className="flex-1 space-y-4">
-              <div>
-                <h1 className="text-3xl font-bold">User Profile</h1>
-                <p className="text-muted-foreground">User ID: {userId}</p>
+              <div className="flex items-start justify-between">
+                <div>
+                  <h1 className="text-3xl font-bold">{userName}</h1>
+                  <p className="text-muted-foreground">
+                    {userProfile?.username && `@${userProfile.username}`}
+                  </p>
+                  {userProfile?.bio && (
+                    <p className="text-muted-foreground mt-2">
+                      {userProfile.bio}
+                    </p>
+                  )}
+                </div>
+                <FollowButton targetUserId={userId} targetUserName={userName} />
               </div>
               <div className="flex gap-2">
                 <Card className="px-4 py-2">
@@ -106,9 +123,10 @@ async function ProfileContent({ userId }: { userId: string }) {
 
         {/* Profile Content Tabs */}
         <Tabs defaultValue="recipes" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="recipes">Recipes</TabsTrigger>
             <TabsTrigger value="collections">Collections</TabsTrigger>
+            <TabsTrigger value="connections">Connections</TabsTrigger>
             <TabsTrigger value="activity">Activity</TabsTrigger>
           </TabsList>
 
@@ -153,13 +171,12 @@ async function ProfileContent({ userId }: { userId: string }) {
             </Card>
           </TabsContent>
 
+          <TabsContent value="connections" className="mt-6">
+            <UserConnections userId={userId} />
+          </TabsContent>
+
           <TabsContent value="activity" className="mt-6">
-            <Card className="p-6">
-              <h3 className="mb-4 text-lg font-semibold">Recent Activity</h3>
-              <p className="text-muted-foreground">
-                Activity feed coming soon...
-              </p>
-            </Card>
+            <ActivityFeed userId={userId} />
           </TabsContent>
         </Tabs>
       </div>
@@ -176,11 +193,17 @@ function ProfileSkeleton() {
           <div className="flex items-start gap-6">
             <Skeleton className="h-24 w-24 rounded-full" />
             <div className="flex-1 space-y-4">
-              <Skeleton className="h-8 w-64" />
-              <Skeleton className="h-4 w-96" />
+              <div className="flex items-start justify-between">
+                <div className="space-y-2">
+                  <Skeleton className="h-8 w-64" />
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-4 w-96" />
+                </div>
+                <Skeleton className="h-10 w-24" />
+              </div>
               <div className="flex gap-2">
-                <Skeleton className="h-10 w-24" />
-                <Skeleton className="h-10 w-24" />
+                <Skeleton className="h-16 w-24" />
+                <Skeleton className="h-16 w-24" />
               </div>
             </div>
           </div>
