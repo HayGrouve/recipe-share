@@ -89,6 +89,7 @@ function IngredientAutocomplete({
 }: IngredientAutocompleteProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [filteredIngredients, setFilteredIngredients] = useState<string[]>([]);
+  const [activeIndex, setActiveIndex] = useState(-1);
 
   const handleInputChange = (inputValue: string) => {
     onChange(inputValue);
@@ -99,24 +100,69 @@ function IngredientAutocomplete({
       ).slice(0, 8); // Limit to 8 suggestions
       setFilteredIngredients(filtered);
       setIsOpen(filtered.length > 0);
+      setActiveIndex(-1);
     } else {
       setIsOpen(false);
+      setActiveIndex(-1);
     }
   };
 
   const selectIngredient = (ingredient: string) => {
     onChange(ingredient);
     setIsOpen(false);
+    setActiveIndex(-1);
   };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (!isOpen) return;
+
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        setActiveIndex((prev) =>
+          prev < filteredIngredients.length - 1 ? prev + 1 : 0
+        );
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        setActiveIndex((prev) =>
+          prev > 0 ? prev - 1 : filteredIngredients.length - 1
+        );
+        break;
+      case 'Enter':
+        e.preventDefault();
+        if (activeIndex >= 0 && filteredIngredients[activeIndex]) {
+          selectIngredient(filteredIngredients[activeIndex]);
+        }
+        break;
+      case 'Escape':
+        setIsOpen(false);
+        setActiveIndex(-1);
+        break;
+    }
+  };
+
+  const comboboxId = `combobox-${Math.random().toString(36).substr(2, 9)}`;
+  const listboxId = `listbox-${Math.random().toString(36).substr(2, 9)}`;
 
   return (
     <div className="relative">
       <div className="relative">
         <Input
+          id={comboboxId}
           value={value}
           onChange={(e) => handleInputChange(e.target.value)}
+          onKeyDown={handleKeyDown}
           placeholder={placeholder || 'Start typing ingredient name...'}
           className="pr-8"
+          role="combobox"
+          aria-expanded={isOpen}
+          aria-haspopup="listbox"
+          aria-owns={listboxId}
+          aria-activedescendant={
+            activeIndex >= 0 ? `option-${activeIndex}` : undefined
+          }
+          aria-autocomplete="list"
           onFocus={() => {
             if (value.length > 0 && filteredIngredients.length > 0) {
               setIsOpen(true);
@@ -124,26 +170,49 @@ function IngredientAutocomplete({
           }}
           onBlur={() => {
             // Delay closing to allow selection
-            setTimeout(() => setIsOpen(false), 150);
+            setTimeout(() => {
+              setIsOpen(false);
+              setActiveIndex(-1);
+            }, 150);
           }}
         />
-        <Search className="absolute top-1/2 right-2 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
+        <Search
+          className="absolute top-1/2 right-2 h-4 w-4 -translate-y-1/2 transform text-gray-400"
+          aria-hidden="true"
+        />
       </div>
 
       {isOpen && filteredIngredients.length > 0 && (
         <Card className="absolute top-full right-0 left-0 z-10 mt-1 max-h-48 overflow-y-auto">
           <CardContent className="p-2">
-            {filteredIngredients.map((ingredient, index) => (
-              <button
-                key={index}
-                type="button"
-                className="w-full rounded px-3 py-2 text-left text-sm hover:bg-gray-100"
-                onMouseDown={(e) => e.preventDefault()} // Prevent input blur
-                onClick={() => selectIngredient(ingredient)}
-              >
-                {ingredient}
-              </button>
-            ))}
+            <ul
+              id={listboxId}
+              role="listbox"
+              aria-label="Ingredient suggestions"
+              className="space-y-0"
+            >
+              {filteredIngredients.map((ingredient, index) => (
+                <li
+                  key={index}
+                  role="option"
+                  aria-selected={index === activeIndex}
+                >
+                  <button
+                    id={`option-${index}`}
+                    type="button"
+                    className={cn(
+                      'w-full rounded px-3 py-2 text-left text-sm hover:bg-gray-100 focus:bg-gray-100 focus:outline-none',
+                      index === activeIndex && 'bg-blue-100'
+                    )}
+                    onMouseDown={(e) => e.preventDefault()} // Prevent input blur
+                    onMouseEnter={() => setActiveIndex(index)}
+                    onClick={() => selectIngredient(ingredient)}
+                  >
+                    {ingredient}
+                  </button>
+                </li>
+              ))}
+            </ul>
           </CardContent>
         </Card>
       )}
@@ -221,15 +290,17 @@ export default function IngredientsStep() {
       </div>
 
       {/* Ingredients List */}
-      <div className="space-y-4">
+      <div className="space-y-4" role="list" aria-label="Recipe ingredients">
         {fields.map((field, index) => {
           const ingredientErrors = errors.ingredients?.[index];
 
           return (
             <Card
               key={field.id}
+              role="listitem"
+              aria-label={`Ingredient ${index + 1} of ${fields.length}`}
               className={cn(
-                'transition-colors',
+                'transition-colors focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2',
                 ingredientErrors
                   ? 'border-red-200 bg-red-50'
                   : 'border-gray-200'
@@ -241,9 +312,30 @@ export default function IngredientsStep() {
             >
               <CardContent className="p-4">
                 <div className="flex items-start gap-3">
-                  {/* Drag Handle */}
-                  <div className="flex items-center pt-2">
-                    <GripVertical className="h-4 w-4 cursor-grab text-gray-400 active:cursor-grabbing" />
+                  {/* Drag Handle & Reorder Controls */}
+                  <div className="flex flex-col items-center gap-1 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => moveIngredient(index, index - 1)}
+                      disabled={index === 0}
+                      aria-label="Move ingredient up"
+                      className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      ↑
+                    </button>
+                    <GripVertical
+                      className="h-4 w-4 cursor-grab text-gray-400 active:cursor-grabbing"
+                      aria-hidden="true"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => moveIngredient(index, index + 1)}
+                      disabled={index === fields.length - 1}
+                      aria-label="Move ingredient down"
+                      className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      ↓
+                    </button>
                   </div>
 
                   {/* Ingredient Fields */}
@@ -252,20 +344,35 @@ export default function IngredientsStep() {
                     <div className="md:col-span-2">
                       <Label
                         htmlFor={`ingredients.${index}.quantity`}
-                        className="text-xs text-gray-600"
+                        className="text-xs font-medium text-gray-700"
                       >
                         Quantity*
                       </Label>
                       <Input
+                        id={`ingredients.${index}.quantity`}
                         {...register(`ingredients.${index}.quantity`)}
                         placeholder="1"
+                        aria-required="true"
+                        aria-invalid={
+                          ingredientErrors?.quantity ? 'true' : 'false'
+                        }
+                        aria-describedby={
+                          ingredientErrors?.quantity
+                            ? `quantity-error-${index}`
+                            : undefined
+                        }
                         className={cn(
                           'mt-1',
-                          ingredientErrors?.quantity && 'border-red-300'
+                          ingredientErrors?.quantity &&
+                            'border-red-300 focus:border-red-500 focus:ring-red-500'
                         )}
                       />
                       {ingredientErrors?.quantity && (
-                        <p className="mt-1 text-xs text-red-600">
+                        <p
+                          id={`quantity-error-${index}`}
+                          role="alert"
+                          className="mt-1 text-xs text-red-600"
+                        >
                           {ingredientErrors.quantity.message}
                         </p>
                       )}
@@ -493,9 +600,10 @@ export default function IngredientsStep() {
                       size="sm"
                       onClick={() => removeIngredient(index)}
                       disabled={fields.length === 1}
-                      className="p-1 text-red-600 hover:bg-red-50 hover:text-red-700"
+                      aria-label={`Remove ingredient ${index + 1}: ${watchedIngredients?.[index]?.name || 'ingredient'}`}
+                      className="min-h-[44px] min-w-[44px] p-1 text-red-600 hover:bg-red-50 hover:text-red-700 focus:ring-2 focus:ring-red-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="h-4 w-4" aria-hidden="true" />
                     </Button>
                   </div>
                 </div>
@@ -511,9 +619,10 @@ export default function IngredientsStep() {
           type="button"
           variant="outline"
           onClick={addIngredient}
-          className="flex items-center gap-2"
+          aria-label={`Add ingredient ${fields.length + 1} to the recipe`}
+          className="flex min-h-[44px] items-center gap-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
         >
-          <Plus className="h-4 w-4" />
+          <Plus className="h-4 w-4" aria-hidden="true" />
           Add Another Ingredient
         </Button>
       </div>
@@ -525,14 +634,14 @@ export default function IngredientsStep() {
             <span className="font-medium text-blue-800">
               Total Ingredients: {fields.length}
             </span>
-            <span className="text-blue-600">
+            <span className="text-blue-600" aria-live="polite">
               {fields.length >= 3
                 ? '✓ Good variety'
                 : 'Consider adding more ingredients'}
             </span>
           </div>
           {fields.length > 10 && (
-            <p className="mt-1 text-xs text-blue-600">
+            <p className="mt-1 text-xs text-blue-600" role="note">
               Tip: For very long ingredient lists, consider grouping by category
               or creating multiple recipes.
             </p>
