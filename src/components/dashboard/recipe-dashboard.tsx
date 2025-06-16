@@ -35,6 +35,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import CollectionsSection from './collections-section';
 
 interface Recipe {
   id: string;
@@ -485,177 +487,193 @@ export function RecipeDashboard() {
         </Card>
       </div>
 
-      {/* Controls */}
-      <div className="flex flex-col items-start justify-between gap-4 lg:flex-row lg:items-center">
-        <div className="flex flex-1 flex-col items-start gap-4 sm:flex-row sm:items-center">
-          {/* Search */}
-          <div className="relative w-full sm:w-auto">
-            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
-            <Input
-              placeholder="Search your recipes..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 sm:w-64"
-            />
-          </div>
+      {/* Main Content Tabs */}
+      <Tabs defaultValue="recipes" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="recipes">Recipes</TabsTrigger>
+          <TabsTrigger value="collections">Collections</TabsTrigger>
+        </TabsList>
 
-          {/* Filters */}
-          <Select
-            value={filterStatus}
-            onValueChange={(value: FilterStatus) => setFilterStatus(value)}
-          >
-            <SelectTrigger className="w-full sm:w-32">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All</SelectItem>
-              <SelectItem value="published">Published</SelectItem>
-              <SelectItem value="draft">Draft</SelectItem>
-              <SelectItem value="private">Private</SelectItem>
-            </SelectContent>
-          </Select>
+        <TabsContent value="recipes" className="space-y-4">
+          {/* Controls */}
+          <div className="flex flex-col items-start justify-between gap-4 lg:flex-row lg:items-center">
+            <div className="flex flex-1 flex-col items-start gap-4 sm:flex-row sm:items-center">
+              {/* Search */}
+              <div className="relative w-full sm:w-auto">
+                <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
+                <Input
+                  placeholder="Search your recipes..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 sm:w-64"
+                />
+              </div>
 
-          {/* Sort */}
-          <Select
-            value={sortBy}
-            onValueChange={(value: SortOption) => setSortBy(value)}
-          >
-            <SelectTrigger className="w-full sm:w-32">
-              <SelectValue placeholder="Sort by" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="newest">Newest</SelectItem>
-              <SelectItem value="oldest">Oldest</SelectItem>
-              <SelectItem value="title">Title</SelectItem>
-              <SelectItem value="rating">Rating</SelectItem>
-              <SelectItem value="views">Views</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+              {/* Filters */}
+              <Select
+                value={filterStatus}
+                onValueChange={(value: FilterStatus) => setFilterStatus(value)}
+              >
+                <SelectTrigger className="w-full sm:w-32">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All</SelectItem>
+                  <SelectItem value="published">Published</SelectItem>
+                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="private">Private</SelectItem>
+                </SelectContent>
+              </Select>
 
-        <div className="flex items-center gap-2">
-          {/* Bulk Actions */}
-          {selectedRecipes.size > 0 && (
-            <div className="mr-4 flex items-center gap-2">
-              <span className="text-sm text-gray-600">
-                {selectedRecipes.size} selected
-              </span>
-              <Button variant="outline" size="sm">
-                Delete Selected
-              </Button>
-              <Button variant="outline" size="sm">
-                Export Selected
-              </Button>
+              {/* Sort */}
+              <Select
+                value={sortBy}
+                onValueChange={(value: SortOption) => setSortBy(value)}
+              >
+                <SelectTrigger className="w-full sm:w-32">
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="newest">Newest</SelectItem>
+                  <SelectItem value="oldest">Oldest</SelectItem>
+                  <SelectItem value="title">Title</SelectItem>
+                  <SelectItem value="rating">Rating</SelectItem>
+                  <SelectItem value="views">Views</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-          )}
 
-          {/* View Toggle */}
-          <div className="flex items-center rounded-md border">
-            <Button
-              variant={viewMode === 'grid' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setViewMode('grid')}
-              className="rounded-r-none"
-            >
-              <Grid3X3 className="h-4 w-4" />
-            </Button>
-            <Button
-              variant={viewMode === 'list' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setViewMode('list')}
-              className="rounded-l-none"
-            >
-              <List className="h-4 w-4" />
-            </Button>
-          </div>
+            <div className="flex items-center gap-2">
+              {/* Bulk Actions */}
+              {selectedRecipes.size > 0 && (
+                <div className="mr-4 flex items-center gap-2">
+                  <span className="text-sm text-gray-600">
+                    {selectedRecipes.size} selected
+                  </span>
+                  <Button variant="outline" size="sm">
+                    Delete Selected
+                  </Button>
+                  <Button variant="outline" size="sm">
+                    Export Selected
+                  </Button>
+                </div>
+              )}
 
-          {/* Create Recipe */}
-          <Button onClick={() => router.push('/recipes/create')}>
-            <Plus className="mr-2 h-4 w-4" />
-            New Recipe
-          </Button>
-        </div>
-      </div>
+              {/* View Toggle */}
+              <div className="flex items-center rounded-md border">
+                <Button
+                  variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('grid')}
+                  className="rounded-r-none"
+                >
+                  <Grid3X3 className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant={viewMode === 'list' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('list')}
+                  className="rounded-l-none"
+                >
+                  <List className="h-4 w-4" />
+                </Button>
+              </div>
 
-      {/* Bulk Selection */}
-      {filteredAndSortedRecipes.length > 0 && (
-        <div className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={selectedRecipes.size === filteredAndSortedRecipes.length}
-            onChange={selectAllRecipes}
-            className="rounded border-gray-300"
-          />
-          <span className="text-sm text-gray-600">
-            Select all {filteredAndSortedRecipes.length} recipes
-          </span>
-        </div>
-      )}
-
-      {/* Loading State */}
-      {loading && (
-        <div className="flex h-64 items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
-        </div>
-      )}
-
-      {/* Error State */}
-      {error && (
-        <Card>
-          <CardContent className="p-6 text-center">
-            <p className="text-red-600">{error}</p>
-            <Button onClick={loadUserRecipes} className="mt-4">
-              Try Again
-            </Button>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Empty State */}
-      {!loading && !error && filteredAndSortedRecipes.length === 0 && (
-        <Card>
-          <CardContent className="p-12 text-center">
-            <div className="mx-auto mb-4 h-24 w-24 text-gray-400">
-              <Plus className="h-full w-full" />
-            </div>
-            <h3 className="mb-2 text-lg font-semibold text-gray-900">
-              {searchQuery || filterStatus !== 'all'
-                ? 'No recipes found'
-                : 'No recipes yet'}
-            </h3>
-            <p className="mb-6 text-gray-600">
-              {searchQuery || filterStatus !== 'all'
-                ? 'Try adjusting your search or filters'
-                : 'Start your culinary journey by creating your first recipe!'}
-            </p>
-            {!searchQuery && filterStatus === 'all' && (
+              {/* Create Recipe */}
               <Button onClick={() => router.push('/recipes/create')}>
                 <Plus className="mr-2 h-4 w-4" />
-                Create Your First Recipe
+                New Recipe
               </Button>
-            )}
-          </CardContent>
-        </Card>
-      )}
+            </div>
+          </div>
 
-      {/* Recipes Grid/List */}
-      {!loading && !error && filteredAndSortedRecipes.length > 0 && (
-        <div
-          className={
-            viewMode === 'grid'
-              ? 'grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
-              : 'space-y-2'
-          }
-        >
-          {filteredAndSortedRecipes.map((recipe) =>
-            viewMode === 'grid' ? (
-              <RecipeCard key={recipe.id} recipe={recipe} />
-            ) : (
-              <RecipeRow key={recipe.id} recipe={recipe} />
-            )
+          {/* Bulk Selection */}
+          {filteredAndSortedRecipes.length > 0 && (
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={
+                  selectedRecipes.size === filteredAndSortedRecipes.length
+                }
+                onChange={selectAllRecipes}
+                className="rounded border-gray-300"
+              />
+              <span className="text-sm text-gray-600">
+                Select all {filteredAndSortedRecipes.length} recipes
+              </span>
+            </div>
           )}
-        </div>
-      )}
+
+          {/* Loading State */}
+          {loading && (
+            <div className="flex h-64 items-center justify-center">
+              <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
+            </div>
+          )}
+
+          {/* Error State */}
+          {error && (
+            <Card>
+              <CardContent className="p-6 text-center">
+                <p className="text-red-600">{error}</p>
+                <Button onClick={loadUserRecipes} className="mt-4">
+                  Try Again
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Empty State */}
+          {!loading && !error && filteredAndSortedRecipes.length === 0 && (
+            <Card>
+              <CardContent className="p-12 text-center">
+                <div className="mx-auto mb-4 h-24 w-24 text-gray-400">
+                  <Plus className="h-full w-full" />
+                </div>
+                <h3 className="mb-2 text-lg font-semibold text-gray-900">
+                  {searchQuery || filterStatus !== 'all'
+                    ? 'No recipes found'
+                    : 'No recipes yet'}
+                </h3>
+                <p className="mb-6 text-gray-600">
+                  {searchQuery || filterStatus !== 'all'
+                    ? 'Try adjusting your search or filters'
+                    : 'Start your culinary journey by creating your first recipe!'}
+                </p>
+                {!searchQuery && filterStatus === 'all' && (
+                  <Button onClick={() => router.push('/recipes/create')}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Create Your First Recipe
+                  </Button>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Recipes Grid/List */}
+          {!loading && !error && filteredAndSortedRecipes.length > 0 && (
+            <div
+              className={
+                viewMode === 'grid'
+                  ? 'grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
+                  : 'space-y-2'
+              }
+            >
+              {filteredAndSortedRecipes.map((recipe) =>
+                viewMode === 'grid' ? (
+                  <RecipeCard key={recipe.id} recipe={recipe} />
+                ) : (
+                  <RecipeRow key={recipe.id} recipe={recipe} />
+                )
+              )}
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="collections">
+          <CollectionsSection viewMode={viewMode} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
