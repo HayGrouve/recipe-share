@@ -24,7 +24,7 @@ export function Header() {
             Recipes
           </Link>
           <Link
-            href="/create"
+            href="/recipes/create"
             className="hover:text-primary text-sm font-medium transition-colors"
           >
             Create Recipe

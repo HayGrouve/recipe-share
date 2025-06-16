@@ -9,6 +9,8 @@ import {
   Copy,
   Download,
   Users,
+  ToggleLeft,
+  ToggleRight,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -26,6 +28,91 @@ interface RecipeIngredientsProps {
   ingredients: Ingredient[];
   originalServings: number;
   className?: string;
+}
+
+// Measurement conversion functions
+const measurementConversions: Record<
+  string,
+  { metric: string; imperial: string; factor: number }
+> = {
+  // Volume conversions
+  cups: { metric: 'ml', imperial: 'cups', factor: 240 },
+  cup: { metric: 'ml', imperial: 'cup', factor: 240 },
+  tablespoons: { metric: 'ml', imperial: 'tablespoons', factor: 15 },
+  tablespoon: { metric: 'ml', imperial: 'tablespoon', factor: 15 },
+  tbsp: { metric: 'ml', imperial: 'tbsp', factor: 15 },
+  teaspoons: { metric: 'ml', imperial: 'teaspoons', factor: 5 },
+  teaspoon: { metric: 'ml', imperial: 'teaspoon', factor: 5 },
+  tsp: { metric: 'ml', imperial: 'tsp', factor: 5 },
+  'fluid ounces': { metric: 'ml', imperial: 'fluid ounces', factor: 30 },
+  'fl oz': { metric: 'ml', imperial: 'fl oz', factor: 30 },
+  pints: { metric: 'ml', imperial: 'pints', factor: 480 },
+  pint: { metric: 'ml', imperial: 'pint', factor: 480 },
+  quarts: { metric: 'L', imperial: 'quarts', factor: 0.95 },
+  quart: { metric: 'L', imperial: 'quart', factor: 0.95 },
+
+  // Weight conversions
+  pounds: { metric: 'g', imperial: 'pounds', factor: 454 },
+  pound: { metric: 'g', imperial: 'pound', factor: 454 },
+  lbs: { metric: 'g', imperial: 'lbs', factor: 454 },
+  lb: { metric: 'g', imperial: 'lb', factor: 454 },
+  ounces: { metric: 'g', imperial: 'ounces', factor: 28 },
+  ounce: { metric: 'g', imperial: 'ounce', factor: 28 },
+  oz: { metric: 'g', imperial: 'oz', factor: 28 },
+
+  // Temperature (handled separately)
+  fahrenheit: { metric: 'celsius', imperial: 'fahrenheit', factor: 1 },
+  f: { metric: 'c', imperial: 'f', factor: 1 },
+};
+
+function convertMeasurement(
+  quantity: string,
+  unit: string,
+  toMetric: boolean
+): { quantity: string; unit: string } {
+  const conversion = measurementConversions[unit.toLowerCase()];
+  if (!conversion) {
+    return { quantity, unit };
+  }
+
+  // Parse quantity
+  const numMatch = quantity.match(/(\d+\.?\d*)/);
+  if (!numMatch) {
+    return { quantity, unit };
+  }
+
+  const num = parseFloat(numMatch[1]);
+
+  if (toMetric) {
+    // Convert to metric
+    let convertedValue = num * conversion.factor;
+    let targetUnit = conversion.metric;
+
+    // Smart unit selection for metric
+    if (targetUnit === 'ml' && convertedValue >= 1000) {
+      convertedValue = convertedValue / 1000;
+      targetUnit = 'L';
+    } else if (targetUnit === 'g' && convertedValue >= 1000) {
+      convertedValue = convertedValue / 1000;
+      targetUnit = 'kg';
+    }
+
+    // Format the number
+    const formattedValue =
+      convertedValue % 1 === 0
+        ? convertedValue.toString()
+        : convertedValue < 10
+          ? convertedValue.toFixed(1)
+          : Math.round(convertedValue).toString();
+
+    return {
+      quantity: formattedValue,
+      unit: targetUnit,
+    };
+  } else {
+    // Convert back to imperial (if it was converted)
+    return { quantity, unit: conversion.imperial };
+  }
 }
 
 // Helper function to parse and scale quantities
@@ -97,6 +184,7 @@ export function RecipeIngredients({
     new Set()
   );
   const [currentServings, setCurrentServings] = useState(originalServings);
+  const [useMetric, setUseMetric] = useState(false);
 
   const servingsScale = currentServings / originalServings;
 
@@ -116,11 +204,20 @@ export function RecipeIngredients({
   }, [ingredients]);
 
   const scaledIngredients = useMemo(() => {
-    return ingredients.map((ingredient) => ({
-      ...ingredient,
-      quantity: scaleQuantity(ingredient.quantity, servingsScale),
-    }));
-  }, [ingredients, servingsScale]);
+    return ingredients.map((ingredient) => {
+      const scaledQuantity = scaleQuantity(ingredient.quantity, servingsScale);
+      const converted = convertMeasurement(
+        scaledQuantity,
+        ingredient.unit,
+        useMetric
+      );
+      return {
+        ...ingredient,
+        quantity: converted.quantity,
+        unit: converted.unit,
+      };
+    });
+  }, [ingredients, servingsScale, useMetric]);
 
   const toggleIngredient = (id: string) => {
     const newChecked = new Set(checkedIngredients);
@@ -270,20 +367,41 @@ export function RecipeIngredients({
           </div>
         </div>
 
-        {/* Export Actions */}
-        <div className="mt-4 flex gap-2">
-          <Button variant="outline" size="sm" onClick={exportToClipboard}>
-            <Copy className="mr-2 h-4 w-4" />
-            Copy List
-          </Button>
-          <Button variant="outline" size="sm" onClick={exportToPDF}>
-            <Download className="mr-2 h-4 w-4" />
-            Download
-          </Button>
-          <Button variant="outline" size="sm">
-            <ShoppingCart className="mr-2 h-4 w-4" />
-            Add to Cart
-          </Button>
+        {/* Measurement Toggle and Export Actions */}
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
+          {/* Measurement Toggle */}
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-600">Units:</span>
+            <button
+              onClick={() => setUseMetric(!useMetric)}
+              className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium transition-colors hover:bg-gray-50"
+            >
+              {useMetric ? (
+                <ToggleRight className="h-4 w-4 text-blue-600" />
+              ) : (
+                <ToggleLeft className="h-4 w-4 text-gray-400" />
+              )}
+              <span className={useMetric ? 'text-blue-600' : 'text-gray-600'}>
+                {useMetric ? 'Metric' : 'Imperial'}
+              </span>
+            </button>
+          </div>
+
+          {/* Export Actions */}
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={exportToClipboard}>
+              <Copy className="mr-2 h-4 w-4" />
+              Copy List
+            </Button>
+            <Button variant="outline" size="sm" onClick={exportToPDF}>
+              <Download className="mr-2 h-4 w-4" />
+              Download
+            </Button>
+            <Button variant="outline" size="sm">
+              <ShoppingCart className="mr-2 h-4 w-4" />
+              Add to Cart
+            </Button>
+          </div>
         </div>
       </CardHeader>
 

@@ -1,0 +1,383 @@
+/* Mobile Accessibility Enhancements */
+
+/* Touch Target Guidelines - Apple recommends 44px, Android 48px, we'll use 48px */
+@media (max-width: 768px) {
+  /* Button Touch Target Enhancements */
+  button,
+  .btn,
+  .button,
+  [role='button'],
+  input[type='button'],
+  input[type='submit'],
+  input[type='reset'] {
+    min-height: 48px !important;
+    min-width: 48px !important;
+    padding: 12px 16px !important;
+    font-size: 16px !important; /* Prevents zoom on iOS */
+  }
+
+  /* Small buttons need larger touch areas */
+  .btn-sm,
+  .button-sm,
+  button[data-size='sm'] {
+    min-height: 44px !important;
+    min-width: 44px !important;
+    padding: 10px 14px !important;
+  }
+
+  /* Icon-only buttons */
+  .btn-icon,
+  .button-icon,
+  button:has(svg:only-child),
+  button:not(:has(span)):not(:has(div)) {
+    min-height: 48px !important;
+    min-width: 48px !important;
+    padding: 12px !important;
+  }
+
+  /* Form Input Accessibility */
+  input,
+  textarea,
+  select {
+    min-height: 48px !important;
+    font-size: 16px !important; /* Prevents zoom on iOS */
+    padding: 12px 16px !important;
+  }
+
+  /* Checkbox and Radio Button Enhancements */
+  input[type='checkbox'],
+  input[type='radio'] {
+    min-height: 20px !important;
+    min-width: 20px !important;
+    transform: scale(1.5);
+    margin: 8px !important;
+  }
+
+  /* Link Touch Targets */
+  a {
+    min-height: 44px !important;
+    display: inline-block !important;
+    padding: 8px 4px !important;
+  }
+
+  /* Recipe-specific enhancements */
+
+  /* Ingredient checkboxes */
+  .ingredient-item {
+    min-height: 56px !important;
+    padding: 16px 12px !important;
+    margin: 4px 0 !important;
+  }
+
+  .ingredient-checkbox {
+    min-height: 24px !important;
+    min-width: 24px !important;
+    margin-right: 16px !important;
+  }
+
+  /* Recipe instruction step buttons */
+  .step-timer-controls button {
+    min-height: 52px !important;
+    min-width: 52px !important;
+    padding: 14px !important;
+    margin: 8px !important;
+  }
+
+  /* Servings adjuster buttons */
+  .servings-adjuster button {
+    min-height: 48px !important;
+    min-width: 48px !important;
+    padding: 12px !important;
+  }
+
+  /* Navigation buttons in cooking mode */
+  .cooking-mode .nav-button {
+    min-height: 64px !important;
+    min-width: 64px !important;
+    padding: 20px !important;
+    font-size: 18px !important;
+  }
+
+  /* Recipe action buttons */
+  .recipe-actions button {
+    min-height: 52px !important;
+    padding: 14px 20px !important;
+    font-size: 16px !important;
+    margin: 8px 4px !important;
+  }
+
+  /* Related recipe cards touch targets */
+  .related-recipe-card {
+    padding: 16px !important;
+  }
+
+  .related-recipe-card button {
+    min-height: 48px !important;
+    padding: 12px 16px !important;
+  }
+
+  /* Measurement toggle */
+  .measurement-toggle {
+    min-height: 48px !important;
+    padding: 12px 16px !important;
+    font-size: 16px !important;
+  }
+
+  /* Progress indicators should be easy to see */
+  .progress-indicator {
+    min-height: 8px !important;
+  }
+
+  /* Modal and dropdown touch targets */
+  .modal button,
+  .dropdown-item {
+    min-height: 52px !important;
+    padding: 16px 20px !important;
+    font-size: 16px !important;
+  }
+
+  /* Search and filter controls */
+  .search-input {
+    min-height: 52px !important;
+    font-size: 16px !important;
+    padding: 14px 16px !important;
+  }
+
+  .filter-button {
+    min-height: 48px !important;
+    padding: 12px 16px !important;
+    margin: 4px !important;
+  }
+
+  /* Tab navigation */
+  .tab-button {
+    min-height: 48px !important;
+    padding: 12px 20px !important;
+    font-size: 16px !important;
+  }
+
+  /* Card interactive elements */
+  .card-action {
+    min-height: 48px !important;
+    padding: 12px 16px !important;
+  }
+
+  /* Spacing improvements for mobile */
+  .mobile-spacing {
+    margin: 12px 0 !important;
+  }
+
+  .mobile-spacing-lg {
+    margin: 20px 0 !important;
+  }
+
+  .mobile-padding {
+    padding: 16px !important;
+  }
+
+  .mobile-padding-lg {
+    padding: 24px !important;
+  }
+
+  /* Text size enhancements for readability */
+  .mobile-text {
+    font-size: 16px !important;
+    line-height: 1.5 !important;
+  }
+
+  .mobile-text-lg {
+    font-size: 18px !important;
+    line-height: 1.4 !important;
+  }
+
+  /* Focus states enhancement for mobile */
+  button:focus,
+  input:focus,
+  textarea:focus,
+  select:focus,
+  a:focus {
+    outline: 3px solid #0066cc !important;
+    outline-offset: 2px !important;
+  }
+
+  /* Active states for better feedback */
+  button:active,
+  .btn:active,
+  [role='button']:active {
+    transform: scale(0.95) !important;
+    transition: transform 0.1s ease !important;
+  }
+
+  /* Improved contrast for mobile */
+  .mobile-contrast {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    border: 2px solid #333333 !important;
+  }
+
+  /* Loading states */
+  .loading-button {
+    min-height: 48px !important;
+    position: relative !important;
+  }
+
+  .loading-button:disabled {
+    opacity: 0.7 !important;
+    cursor: not-allowed !important;
+  }
+
+  /* Better mobile navigation */
+  .mobile-nav {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 100 !important;
+    background: white !important;
+    border-bottom: 1px solid #e5e7eb !important;
+    padding: 12px 16px !important;
+  }
+
+  .mobile-nav button {
+    min-height: 44px !important;
+    min-width: 44px !important;
+  }
+
+  /* Cooking mode specific enhancements */
+  .cooking-mode {
+    background-color: #1f2937 !important;
+    color: white !important;
+  }
+
+  .cooking-mode button {
+    background-color: #374151 !important;
+    color: white !important;
+    border: 2px solid #6b7280 !important;
+    min-height: 56px !important;
+  }
+
+  .cooking-mode button:hover {
+    background-color: #4b5563 !important;
+  }
+
+  .cooking-mode button:active {
+    background-color: #6b7280 !important;
+  }
+
+  /* Timer display in cooking mode */
+  .cooking-timer {
+    font-size: 24px !important;
+    font-weight: bold !important;
+    min-height: 64px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  /* Better mobile scrolling */
+  .mobile-scroll {
+    -webkit-overflow-scrolling: touch !important;
+    scroll-behavior: smooth !important;
+  }
+
+  /* Mobile-specific utility classes */
+  .touch-friendly {
+    min-height: 48px !important;
+    min-width: 48px !important;
+    padding: 12px !important;
+  }
+
+  .touch-friendly-sm {
+    min-height: 44px !important;
+    min-width: 44px !important;
+    padding: 10px !important;
+  }
+
+  .touch-friendly-lg {
+    min-height: 56px !important;
+    min-width: 56px !important;
+    padding: 16px !important;
+  }
+
+  /* Hide elements that aren't useful on mobile */
+  .mobile-hidden {
+    display: none !important;
+  }
+
+  /* Show elements only on mobile */
+  .mobile-only {
+    display: block !important;
+  }
+}
+
+/* Tablet-specific adjustments */
+@media (min-width: 769px) and (max-width: 1024px) {
+  button,
+  .btn,
+  [role='button'] {
+    min-height: 44px !important;
+    min-width: 44px !important;
+    padding: 10px 14px !important;
+  }
+
+  .touch-friendly {
+    min-height: 44px !important;
+    min-width: 44px !important;
+    padding: 10px !important;
+  }
+}
+
+/* High DPI display adjustments */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  button,
+  .btn,
+  [role='button'] {
+    border-width: 1px !important;
+  }
+
+  .touch-friendly {
+    border-width: 1px !important;
+  }
+}
+
+/* Landscape orientation adjustments */
+@media (max-width: 768px) and (orientation: landscape) {
+  .cooking-mode .nav-button {
+    min-height: 48px !important;
+    min-width: 48px !important;
+    padding: 12px !important;
+  }
+
+  .mobile-nav {
+    padding: 8px 16px !important;
+  }
+}
+
+/* Dark mode mobile enhancements */
+@media (prefers-color-scheme: dark) and (max-width: 768px) {
+  button:focus,
+  input:focus,
+  textarea:focus,
+  select:focus,
+  a:focus {
+    outline: 3px solid #60a5fa !important;
+  }
+
+  .mobile-contrast {
+    background-color: #1f2937 !important;
+    color: #ffffff !important;
+    border: 2px solid #9ca3af !important;
+  }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  button:active,
+  .btn:active,
+  [role='button']:active {
+    transform: none !important;
+    transition: none !important;
+  }
+
+  .mobile-scroll {
+    scroll-behavior: auto !important;
+  }
+}

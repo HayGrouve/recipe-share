@@ -12,6 +12,7 @@ import {
   ArrowLeft,
   Timer,
   Globe,
+  FileText,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -21,6 +22,7 @@ import { RecipeInstructions } from '@/components/recipes/recipe-instructions';
 import { RecipeNutrition } from '@/components/recipes/recipe-nutrition';
 import { RecipeTagsCategories } from '@/components/recipes/recipe-tags-categories';
 import { RecipeInteractions } from '@/components/recipes/recipe-interactions';
+import { RecipeRelated } from '@/components/recipes/recipe-related';
 
 interface RecipePageProps {
   params: Promise<{ id: string }>;
@@ -741,7 +743,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
         />
 
         {/* Action Buttons */}
-        <div className="mt-8 flex flex-wrap justify-center gap-4">
+        <div className="print-hidden mt-8 flex flex-wrap justify-center gap-4">
           <Button size="lg" className="bg-blue-600 hover:bg-blue-700">
             <Heart className="mr-2 h-5 w-5" />
             Add to Favorites
@@ -754,8 +756,33 @@ export default async function RecipePage({ params }: RecipePageProps) {
             <Share2 className="mr-2 h-5 w-5" />
             Share Recipe
           </Button>
+          <Button
+            variant="outline"
+            size="lg"
+            onClick={() => window.print()}
+            className="print-hidden"
+          >
+            <FileText className="mr-2 h-5 w-5" />
+            Print Recipe
+          </Button>
         </div>
       </div>
+
+      {/* Related Recipes Section */}
+      <RecipeRelated
+        currentRecipe={{
+          id: recipe.id,
+          title: recipe.title,
+          tags: ['breakfast', 'pancakes', 'easy'],
+          category: recipe.category || 'Breakfast',
+          author: {
+            id: recipe.userId,
+            name: authorDisplayName,
+          },
+        }}
+        limit={4}
+        className="print-hidden"
+      />
     </div>
   );
 }
