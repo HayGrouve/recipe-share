@@ -18,20 +18,20 @@ Schema changes may be required when:
 
 ## Workflow Steps
 
-### 1. Update Local Schema Documentation
+### 1. Define Schema Changes
 
 When a schema change is needed:
 
-1. **Update `database_setup.md`** with the new or modified table definitions in Drizzle format
+1. **Define the new or modified table structures** in Drizzle format that need to be added to `@haygrouve/db-schema`
 2. **Document the change reason** and any migration considerations
 3. **Include any new relationships** or constraints that need to be established
 
 ### 2. Request Package Update
 
-After updating the local documentation:
+After defining the schema changes:
 
 1. **Contact the package maintainer** (you) with the schema change request
-2. **Reference the updated `database_setup.md`** file for the exact schema definitions
+2. **Provide the exact Drizzle schema definitions** that need to be added to the package
 3. **Provide context** about why the change is needed and any urgency
 4. **Include any special migration instructions** if the change affects existing data
 
@@ -70,10 +70,10 @@ Once the package is updated:
 
 ### Scenario: Adding a Recipe Reviews Feature
 
-**1. Update `database_setup.md`:**
+**1. Define Schema for Package Update:**
 
 ```typescript
-// Add to database_setup.md
+// Schema to be added to @haygrouve/db-schema
 export const recipes_recipe_reviews = pgTable(
   'recipes_recipe_reviews',
   {
@@ -100,11 +100,13 @@ export const recipes_recipe_reviews = pgTable(
 **2. Request Message:**
 
 ```
-Hi! I need to add a new table for recipe reviews. I've updated the database_setup.md
-file with the new `recipes_recipe_reviews` table definition. This is needed for the
-new review feature we're implementing. The table includes foreign key references to
-the existing recipes table. No existing data migration is needed since this is a
-new feature. Please let me know when the package is updated!
+Hi! I need to add a new table for recipe reviews. Here's the schema definition
+for the new `recipes_recipe_reviews` table that needs to be added to @haygrouve/db-schema.
+This is needed for the new review feature we're implementing. The table includes
+foreign key references to the existing recipes table. No existing data migration
+is needed since this is a new feature. Please let me know when the package is updated!
+
+[Include the schema definition from step 1]
 ```
 
 **3. After Package Update:**
@@ -180,7 +182,7 @@ For schema change requests or questions about the workflow:
 
 - **Package Maintainer**: [Your contact information]
 - **Emergency Contact**: [Alternative contact for urgent issues]
-- **Documentation**: This file and `database_setup.md`
+- **Documentation**: This file and the `@haygrouve/db-schema` package source
 
 ## Version History
 

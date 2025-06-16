@@ -16,6 +16,9 @@ import {
   Edit,
   Copy,
   Trash2,
+  Download,
+  FileText,
+  Settings,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -211,6 +214,145 @@ export function RecipeDashboard() {
           }
         }
         break;
+      case 'toggleStatus':
+        await handleStatusToggle(recipeId);
+        break;
+    }
+  };
+
+  const handleStatusToggle = async (recipeId: string) => {
+    try {
+      const recipe = recipes.find((r) => r.id === recipeId);
+      if (!recipe) return;
+
+      const newStatus = recipe.status === 'published' ? 'draft' : 'published';
+
+      const response = await fetch(`/api/recipes/${recipeId}/status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update recipe status');
+      }
+
+      // Reload recipes to get updated data
+      loadUserRecipes();
+    } catch (error) {
+      console.error('Error toggling recipe status:', error);
+      setError('Failed to update recipe status');
+    }
+  };
+
+  const handleBulkStatusChange = async (newStatus: 'published' | 'draft') => {
+    const selectedIds = Array.from(selectedRecipes);
+    if (selectedIds.length === 0) return;
+
+    try {
+      const response = await fetch('/api/recipes/bulk', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: 'updateStatus',
+          recipeIds: selectedIds,
+          status: newStatus,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update recipe statuses');
+      }
+
+      // Reload recipes and clear selection
+      loadUserRecipes();
+      setSelectedRecipes(new Set());
+    } catch (error) {
+      console.error('Error updating recipe statuses:', error);
+      setError('Failed to update recipe statuses');
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    const selectedIds = Array.from(selectedRecipes);
+    if (selectedIds.length === 0) return;
+
+    if (
+      !confirm(
+        `Are you sure you want to delete ${selectedIds.length} recipe(s)?`
+      )
+    ) {
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/recipes/bulk', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: 'delete',
+          recipeIds: selectedIds,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete recipes');
+      }
+
+      // Reload recipes and clear selection
+      loadUserRecipes();
+      setSelectedRecipes(new Set());
+    } catch (error) {
+      console.error('Error deleting recipes:', error);
+      setError('Failed to delete recipes');
+    }
+  };
+
+  const handleBulkExport = async () => {
+    const selectedIds = Array.from(selectedRecipes);
+    if (selectedIds.length === 0) return;
+
+    try {
+      // Generate printable format
+      const selectedRecipeData = recipes.filter((r) =>
+        selectedIds.includes(r.id)
+      );
+      const exportData = selectedRecipeData.map((recipe) => ({
+        title: recipe.title,
+        description: recipe.description,
+        prepTime: recipe.prepTime,
+        cookTime: recipe.cookTime,
+        servings: recipe.servings,
+        difficulty: recipe.difficulty,
+        cuisine: recipe.cuisine,
+        category: recipe.category,
+        // Note: Instructions and ingredients would need separate API calls
+        // For now, just include basic info
+      }));
+
+      // Create downloadable JSON file
+      const dataStr = JSON.stringify(exportData, null, 2);
+      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(dataBlob);
+
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `recipes-export-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      setSelectedRecipes(new Set());
+    } catch (error) {
+      console.error('Error exporting recipes:', error);
+      setError('Failed to export recipes');
     }
   };
 
@@ -277,6 +419,12 @@ export function RecipeDashboard() {
                 Duplicate
               </DropdownMenuItem>
               <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => handleRecipeAction('toggleStatus', recipe.id)}
+              >
+                <Settings className="mr-2 h-4 w-4" />
+                {recipe.status === 'published' ? 'Make Draft' : 'Publish'}
+              </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => handleRecipeAction('delete', recipe.id)}
                 className="text-red-600"
@@ -405,6 +553,12 @@ export function RecipeDashboard() {
                 Duplicate
               </DropdownMenuItem>
               <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => handleRecipeAction('toggleStatus', recipe.id)}
+              >
+                <Settings className="mr-2 h-4 w-4" />
+                {recipe.status === 'published' ? 'Make Draft' : 'Publish'}
+              </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => handleRecipeAction('delete', recipe.id)}
                 className="text-red-600"
@@ -550,12 +704,42 @@ export function RecipeDashboard() {
                   <span className="text-sm text-gray-600">
                     {selectedRecipes.size} selected
                   </span>
-                  <Button variant="outline" size="sm">
-                    Delete Selected
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    Export Selected
-                  </Button>
+
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        <Settings className="mr-2 h-4 w-4" />
+                        Bulk Actions
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem
+                        onClick={() => handleBulkStatusChange('published')}
+                      >
+                        <FileText className="mr-2 h-4 w-4" />
+                        Publish Selected
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleBulkStatusChange('draft')}
+                      >
+                        <FileText className="mr-2 h-4 w-4" />
+                        Make Draft
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={handleBulkExport}>
+                        <Download className="mr-2 h-4 w-4" />
+                        Export Selected
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={handleBulkDelete}
+                        className="text-red-600"
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Delete Selected
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               )}
 

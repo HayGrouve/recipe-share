@@ -2,6 +2,8 @@
 
 This document outlines the improvements made to the database setup to follow best practices for using the `@haygrouve/db-schema` shared package.
 
+> **Note**: For current database schema reference and usage patterns, see [`database-schema-reference.md`](./database-schema-reference.md) which serves as the comprehensive guide for working with the `@haygrouve/db-schema` package.
+
 ## Changes Made
 
 ### 1. **Migrated from node-postgres to postgres-js**
@@ -141,3 +143,7 @@ const fullRecipe = await db
 3. Implement webhook database sync once drizzle-orm version compatibility is resolved
 4. Add database queries to API routes
 5. Implement user synchronization with Clerk webhooks
+
+---
+
+**Historical Note**: This document describes the migration process and improvements made to use the `@haygrouve/db-schema` package. For current schema reference and usage patterns, refer to [`database-schema-reference.md`](./database-schema-reference.md).
