@@ -25,7 +25,6 @@ import {
   ChefHat,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { IngredientHighlight } from './extensions/IngredientHighlight';
 import './editor.css';
 
 interface RecipeRichTextEditorProps {
@@ -117,10 +116,6 @@ export const RecipeRichTextEditor = ({
       }),
       Placeholder.configure({
         placeholder,
-      }),
-      IngredientHighlight.configure({
-        ingredients,
-        className: 'recipe-ingredient',
       }),
     ],
     content,
