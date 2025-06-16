@@ -34,7 +34,7 @@ export interface UseRecipeFormReturn {
   lastSavedAt: Date | null;
 }
 
-const defaultFormValues: Partial<RecipeFormData> = {
+const defaultFormValues: RecipeFormData = {
   title: '',
   description: '',
   cuisine: '',
@@ -57,6 +57,7 @@ const defaultFormValues: Partial<RecipeFormData> = {
     },
   ],
   instructions: '',
+  nutrition: undefined,
   tags: [],
   dietaryRestrictions: [],
 };
@@ -92,7 +93,6 @@ export function useRecipeForm(
   });
 
   const { watch, reset, getValues, formState } = form;
-  const watchedValues = watch();
 
   // Load existing recipe data for edit mode
   useEffect(() => {

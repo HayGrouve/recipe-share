@@ -18,6 +18,7 @@ import {
 import { cn } from '@/lib/utils';
 import IngredientsStep from './form-steps/ingredients-step';
 import ImagesStep from './form-steps/images-step';
+import InstructionsStep from './form-steps/instructions-step';
 import DeleteConfirmationModal from './delete-confirmation-modal';
 import { useRecipeForm } from '@/hooks/use-recipe-form';
 import { type RecipeFormData } from '@/lib/validations/recipe';
@@ -239,16 +240,7 @@ export default function RecipeCreateForm() {
       case 5:
         return <IngredientsStep />;
       case 6:
-        return (
-          <div className="space-y-4">
-            <div className="text-center text-gray-500">
-              <p>Instructions step content will be implemented next.</p>
-              <p className="mt-2 text-sm">
-                Rich text editor for cooking instructions.
-              </p>
-            </div>
-          </div>
-        );
+        return <InstructionsStep />;
       case 7:
         return (
           <div className="space-y-4">
