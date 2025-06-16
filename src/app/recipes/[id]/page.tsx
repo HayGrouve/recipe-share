@@ -19,6 +19,8 @@ import { Badge } from '@/components/ui/badge';
 import { RecipeIngredients } from '@/components/recipes/recipe-ingredients';
 import { RecipeInstructions } from '@/components/recipes/recipe-instructions';
 import { RecipeNutrition } from '@/components/recipes/recipe-nutrition';
+import { RecipeTagsCategories } from '@/components/recipes/recipe-tags-categories';
+import { RecipeInteractions } from '@/components/recipes/recipe-interactions';
 
 interface RecipePageProps {
   params: Promise<{ id: string }>;
@@ -115,6 +117,273 @@ export default async function RecipePage({ params }: RecipePageProps) {
       : recipe.author?.firstName ||
         recipe.author?.lastName ||
         'Anonymous Chef');
+
+  // Sample nutrition data
+  const nutrition = {
+    calories: 320,
+    servings: 4,
+    protein: 8,
+    carbs: 45,
+    fat: 12,
+    fiber: 3,
+    sugar: 8,
+    sodium: 450,
+    cholesterol: 65,
+    saturatedFat: 3.2,
+    transFat: 0.1,
+    vitaminA: 15,
+    vitaminC: 2,
+    calcium: 20,
+    iron: 15,
+    potassium: 180,
+  };
+
+  // Sample tags data
+  const recipeTags = [
+    {
+      id: '1',
+      name: 'vegetarian',
+      color: 'green',
+      category: 'dietary' as const,
+      count: 124,
+    },
+    {
+      id: '2',
+      name: 'quick-breakfast',
+      color: 'blue',
+      category: 'meal-type' as const,
+      count: 87,
+    },
+    {
+      id: '3',
+      name: 'griddle',
+      color: 'orange',
+      category: 'cooking-method' as const,
+      count: 43,
+    },
+    {
+      id: '4',
+      name: 'american',
+      color: 'red',
+      category: 'cuisine' as const,
+      count: 201,
+    },
+    {
+      id: '5',
+      name: 'easy',
+      color: 'yellow',
+      category: 'difficulty' as const,
+      count: 315,
+    },
+    {
+      id: '6',
+      name: 'family-friendly',
+      color: 'purple',
+      category: 'custom' as const,
+      count: 156,
+    },
+    {
+      id: '7',
+      name: 'weekend-special',
+      color: 'pink',
+      category: 'custom' as const,
+      count: 67,
+    },
+    {
+      id: '8',
+      name: 'comfort-food',
+      color: 'brown',
+      category: 'custom' as const,
+      count: 89,
+    },
+  ];
+
+  // Sample categories data
+  const recipeCategories = [
+    {
+      id: '1',
+      name: 'Breakfast & Brunch',
+      description: 'Start your day with delicious breakfast recipes',
+      icon: null,
+      recipeCount: 145,
+      slug: 'breakfast-brunch',
+    },
+    {
+      id: '2',
+      name: 'Quick & Easy',
+      description: 'Recipes ready in 30 minutes or less',
+      icon: null,
+      recipeCount: 298,
+      slug: 'quick-easy',
+    },
+    {
+      id: '3',
+      name: 'Comfort Food',
+      description: 'Hearty, satisfying dishes for any occasion',
+      icon: null,
+      recipeCount: 187,
+      slug: 'comfort-food',
+    },
+    {
+      id: '4',
+      name: 'American Classics',
+      description: 'Traditional American recipes with a modern twist',
+      icon: null,
+      recipeCount: 134,
+      slug: 'american-classics',
+    },
+  ];
+
+  // Sample variations data
+  const recipeVariations = [
+    {
+      id: '1',
+      title: 'Gluten-Free Pancakes',
+      description:
+        'A delicious gluten-free version using almond flour and rice flour blend',
+      changes: {
+        ingredients: [
+          'Replace all-purpose flour with gluten-free flour blend',
+          'Add xanthan gum for binding',
+        ],
+        cookTime: 15,
+        servings: 4,
+      },
+      difficulty: 'Easy',
+      tags: ['gluten-free', 'almond-flour'],
+      authorNote:
+        'These turn out just as fluffy as the original! Make sure to let the batter rest for 5 minutes.',
+      createdBy: {
+        name: 'Sarah Miller',
+        avatar: '/avatars/sarah.jpg',
+      },
+      createdAt: '2024-01-15T10:30:00Z',
+    },
+    {
+      id: '2',
+      title: 'Protein Power Pancakes',
+      description: 'High-protein version perfect for post-workout breakfast',
+      changes: {
+        ingredients: [
+          'Add protein powder',
+          'Replace some flour with oat flour',
+          'Add Greek yogurt',
+        ],
+        instructions: ['Mix protein powder with dry ingredients first'],
+        cookTime: 12,
+        servings: 3,
+      },
+      difficulty: 'Easy',
+      tags: ['high-protein', 'post-workout', 'healthy'],
+      authorNote:
+        'Great for fitness enthusiasts! Use vanilla protein powder for best taste.',
+      createdBy: {
+        name: 'Mike Johnson',
+        avatar: '/avatars/mike.jpg',
+      },
+      createdAt: '2024-01-10T08:15:00Z',
+    },
+    {
+      id: '3',
+      title: 'Vegan Pancakes',
+      description: 'Plant-based version using flax eggs and plant milk',
+      changes: {
+        ingredients: [
+          'Replace eggs with flax eggs',
+          'Use plant-based milk',
+          'Substitute butter with coconut oil',
+        ],
+        cookTime: 18,
+        servings: 4,
+      },
+      difficulty: 'Medium',
+      tags: ['vegan', 'plant-based', 'dairy-free'],
+      createdBy: {
+        name: 'Emma Green',
+        avatar: '/avatars/emma.jpg',
+      },
+      createdAt: '2024-01-08T14:20:00Z',
+    },
+  ];
+
+  // Sample interaction data
+  const sampleComments = [
+    {
+      id: '1',
+      userId: 'user1',
+      userName: 'Sarah Johnson',
+      userAvatar: '/avatars/sarah.jpg',
+      content:
+        'These pancakes turned out amazing! My kids absolutely loved them. I added some blueberries and they were perfect.',
+      createdAt: '2024-01-15T09:30:00Z',
+      likes: 12,
+      dislikes: 0,
+      replies: [
+        {
+          id: '1-1',
+          userId: 'user2',
+          userName: 'Mike Chen',
+          content:
+            'Blueberry addition sounds great! Did you add them fresh or frozen?',
+          createdAt: '2024-01-15T10:15:00Z',
+          likes: 3,
+          dislikes: 0,
+        },
+      ],
+    },
+    {
+      id: '2',
+      userId: 'user3',
+      userName: 'Emma Wilson',
+      content:
+        'Perfect recipe for weekend brunch! The batter consistency was just right and they cooked evenly. Will definitely make again.',
+      createdAt: '2024-01-14T14:20:00Z',
+      likes: 8,
+      dislikes: 0,
+    },
+    {
+      id: '3',
+      userId: 'user4',
+      userName: 'David Brown',
+      content:
+        'Good recipe overall, but I found them a bit too sweet for my taste. Next time I will reduce the sugar by half.',
+      createdAt: '2024-01-13T11:45:00Z',
+      likes: 5,
+      dislikes: 1,
+    },
+  ];
+
+  const userInteraction = {
+    isSaved: false,
+    isLiked: true,
+    userRating: undefined, // No rating yet
+  };
+
+  // Handler functions for interactions
+  const handleRate = (rating: number, comment?: string) => {
+    console.log('Rating submitted:', rating, comment);
+    // This would typically send to API
+  };
+
+  const handleComment = (content: string, parentId?: string) => {
+    console.log('Comment submitted:', content, parentId);
+    // This would typically send to API
+  };
+
+  const handleSave = () => {
+    console.log('Recipe saved/unsaved');
+    // This would typically toggle save status via API
+  };
+
+  const handleLike = () => {
+    console.log('Recipe liked/unliked');
+    // This would typically toggle like status via API
+  };
+
+  const handleShare = () => {
+    console.log('Recipe shared');
+    // This would typically open share dialog or copy URL
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -442,23 +711,32 @@ export default async function RecipePage({ params }: RecipePageProps) {
 
         {/* Nutrition Section */}
         <RecipeNutrition
-          nutrition={{
-            calories: 320,
-            protein: 12.5,
-            carbs: 45.2,
-            fat: 8.3,
-            fiber: 3.1,
-            sugar: 8.7,
-            sodium: 420,
-            cholesterol: 95,
-            saturatedFat: 3.2,
-            transFat: 0.1,
-            vitaminA: 15,
-            vitaminC: 8,
-            calcium: 25,
-            iron: 12,
-          }}
+          nutrition={nutrition}
           servings={recipe.servings || 4}
+          className="mb-8"
+        />
+
+        {/* Tags, Categories, and Variations Section */}
+        <RecipeTagsCategories
+          tags={recipeTags}
+          categories={recipeCategories}
+          variations={recipeVariations}
+          className="mb-8"
+        />
+
+        {/* User Interactions Section */}
+        <RecipeInteractions
+          averageRating={4.3}
+          totalRatings={127}
+          totalSaves={89}
+          totalLikes={156}
+          comments={sampleComments}
+          userInteraction={userInteraction}
+          onRate={handleRate}
+          onComment={handleComment}
+          onSave={handleSave}
+          onLike={handleLike}
+          onShare={handleShare}
           className="mb-8"
         />
 
