@@ -1,0 +1,22 @@
+User-agent: *
+Allow: /
+
+# Allow all pages
+Allow: /recipes
+Allow: /recipes/*
+Allow: /dashboard
+Allow: /profile
+Allow: /profile/*
+
+# Disallow admin and sensitive areas
+Disallow: /api/
+Disallow: /dashboard/admin
+Disallow: /test-*
+Disallow: /_next/
+Disallow: /offline
+
+# Sitemap location
+Sitemap: https://recipe-share.vercel.app/sitemap.xml
+
+# Crawl delay (optional)
+Crawl-delay: 1 

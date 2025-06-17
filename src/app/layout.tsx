@@ -14,6 +14,10 @@ import {
   IOSInstallPrompt,
 } from '@/components/pwa/install-prompt';
 import { OfflineIndicator } from '@/components/pwa/offline-indicator';
+import {
+  WebsiteStructuredData,
+  OrganizationStructuredData,
+} from '@/components/seo/structured-data';
 
 const inter = Inter({
   variable: '--font-inter',
@@ -85,6 +89,8 @@ export default function RootLayout({
             <PWAInstallPrompt />
             <IOSInstallPrompt />
             <OfflineIndicator />
+            <WebsiteStructuredData />
+            <OrganizationStructuredData />
           </QueryProvider>
         </body>
       </html>
