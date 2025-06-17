@@ -55,7 +55,7 @@
     "postgres": "^3.4.7",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-hook-form": "^7.58.0",
+    "react-hook-form": "^7.58.1",
     "sonner": "^2.0.5",
     "svix": "^1.67.0",
     "tailwind-merge": "^3.3.0",
