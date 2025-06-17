@@ -2,6 +2,9 @@ import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 import * as schema from '@haygrouve/db-schema';
 
+// Type helper for postgres queries
+type PostgresQueryResult<T = unknown> = Promise<T[]>;
+
 // Connection pool configuration for production
 const createConnection = () => {
   const connectionString = process.env.DATABASE_URL;
@@ -80,7 +83,9 @@ export const checkDatabaseHealth = async (): Promise<DatabaseHealth> => {
       FROM pg_stat_activity 
       WHERE state = 'active'
     `;
-    const connectionResult = await sql(connectionQuery);
+    const connectionResult = await (sql(
+      connectionQuery
+    ) as unknown as PostgresQueryResult<{ count: string | number }>);
 
     const connectionCount = Number(connectionResult[0]?.count || 0);
     const responseTime = Date.now() - startTime;
@@ -158,7 +163,15 @@ export const getDatabaseMetrics = async (): Promise<DatabaseMetrics> => {
       ORDER BY pg_total_relation_size(schemaname||'.'||tablename) DESC;
     `;
 
-    const tableStats = await sql(tableStatsQuery);
+    const tableStats = await (sql(
+      tableStatsQuery
+    ) as unknown as PostgresQueryResult<{
+      schemaname: string;
+      tablename: string;
+      total_operations: string;
+      table_size: string;
+      index_size: string;
+    }>);
 
     // Get connection statistics
     const connectionStatsQuery = `
@@ -170,7 +183,13 @@ export const getDatabaseMetrics = async (): Promise<DatabaseMetrics> => {
       WHERE datname = current_database();
     `;
 
-    const connectionStats = await sql(connectionStatsQuery);
+    const connectionStats = await (sql(
+      connectionStatsQuery
+    ) as unknown as PostgresQueryResult<{
+      total_connections: string | number;
+      active_connections: string | number;
+      idle_connections: string | number;
+    }>);
 
     // Get performance statistics
     const performanceStatsQuery = `
@@ -180,7 +199,13 @@ export const getDatabaseMetrics = async (): Promise<DatabaseMetrics> => {
         (SELECT count(*) FROM pg_stat_activity WHERE wait_event_type = 'Lock') as blocked_queries;
     `;
 
-    const performanceStats = await sql(performanceStatsQuery);
+    const performanceStats = await (sql(
+      performanceStatsQuery
+    ) as unknown as PostgresQueryResult<{
+      slow_queries: string | number;
+      cache_hit_ratio: string | number;
+      blocked_queries: string | number;
+    }>);
 
     interface ConnectionStat {
       total_connections: string | number;
