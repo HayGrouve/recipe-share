@@ -280,9 +280,12 @@ const NumericInput = React.forwardRef<HTMLInputElement, NumericInputProps>(
 
     React.useEffect(() => {
       if (value !== undefined) {
-        setDisplayValue(formatNumber(value));
+        const numValue = typeof value === 'number' ? value : Number(value);
+        if (!isNaN(numValue)) {
+          setDisplayValue(formatNumber(numValue));
+        }
       }
-    }, [value, precision]);
+    }, [value, formatNumber]);
 
     return (
       <Input

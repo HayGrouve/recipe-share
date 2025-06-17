@@ -148,58 +148,19 @@ const SelectContent = React.forwardRef<
       const filtered = React.Children.toArray(children).filter((child) => {
         if (!React.isValidElement(child)) return true;
 
-        // Handle SelectItem children
-        if (child.type === SelectItem) {
-          const childProps = child.props as any;
-          const value = childProps.value?.toLowerCase() || '';
+        // Simple text-based search - avoid complex type checking
+        const query = searchQuery.toLowerCase();
+        if (React.isValidElement(child)) {
+          const childProps = child.props as Record<string, unknown>;
+          const value =
+            typeof childProps.value === 'string'
+              ? childProps.value.toLowerCase()
+              : '';
           const textContent =
-            childProps.children?.toString().toLowerCase() || '';
-          const query = searchQuery.toLowerCase();
-
+            typeof childProps.children === 'string'
+              ? childProps.children.toLowerCase()
+              : '';
           return value.includes(query) || textContent.includes(query);
-        }
-
-        // Handle SelectGroup children
-        if (child.type === SelectGroup) {
-          const groupChildren = React.Children.toArray(child.props.children);
-          const hasMatchingChildren = groupChildren.some((groupChild) => {
-            if (
-              !React.isValidElement(groupChild) ||
-              groupChild.type !== SelectItem
-            )
-              return false;
-
-            const childProps = groupChild.props as any;
-            const value = childProps.value?.toLowerCase() || '';
-            const textContent =
-              childProps.children?.toString().toLowerCase() || '';
-            const query = searchQuery.toLowerCase();
-
-            return value.includes(query) || textContent.includes(query);
-          });
-
-          if (hasMatchingChildren) {
-            // Return group with filtered children
-            const filteredGroupChildren = groupChildren.filter((groupChild) => {
-              if (
-                !React.isValidElement(groupChild) ||
-                groupChild.type !== SelectItem
-              )
-                return true;
-
-              const childProps = groupChild.props as any;
-              const value = childProps.value?.toLowerCase() || '';
-              const textContent =
-                childProps.children?.toString().toLowerCase() || '';
-              const query = searchQuery.toLowerCase();
-
-              return value.includes(query) || textContent.includes(query);
-            });
-
-            return React.cloneElement(child, {}, ...filteredGroupChildren);
-          }
-
-          return false;
         }
 
         return true;
@@ -405,7 +366,7 @@ const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>(
               : 'border-input focus:border-ring',
             className
           )}
-          aria-invalid={error}
+          data-invalid={error}
           aria-expanded={open}
           aria-haspopup="listbox"
         >

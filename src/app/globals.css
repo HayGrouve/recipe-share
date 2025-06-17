@@ -197,4 +197,175 @@
   .keyboard-nav-active [tabindex]:focus {
     @apply ring-primary ring-2 ring-offset-2;
   }
+
+  /* Kitchen mode styles */
+  .kitchen-mode {
+    /* Larger touch targets */
+    button,
+    [role='button'],
+    input[type='button'],
+    input[type='submit'],
+    input[type='reset'] {
+      @apply min-h-12 min-w-12 px-6 py-3 text-lg;
+    }
+
+    /* Larger form inputs */
+    input[type='text'],
+    input[type='email'],
+    input[type='password'],
+    input[type='search'],
+    input[type='number'],
+    textarea,
+    select {
+      @apply min-h-12 px-4 py-3 text-lg;
+    }
+
+    /* Larger text for better readability */
+    body {
+      @apply text-lg leading-relaxed;
+    }
+
+    h1 {
+      @apply text-4xl;
+    }
+    h2 {
+      @apply text-3xl;
+    }
+    h3 {
+      @apply text-2xl;
+    }
+    h4 {
+      @apply text-xl;
+    }
+
+    /* More spacing for easier interaction */
+    .recipe-step {
+      @apply mb-6 rounded-lg border-2 p-6;
+    }
+
+    .recipe-ingredient {
+      @apply mb-3 p-3 text-lg;
+    }
+
+    /* Hide non-essential UI elements */
+    .kitchen-mode-hide {
+      @apply hidden;
+    }
+
+    /* Emphasize important elements */
+    .recipe-timer,
+    .recipe-quantity {
+      @apply bg-primary/10 rounded-lg px-4 py-2 text-2xl font-bold;
+    }
+  }
+
+  /* High contrast mode */
+  .high-contrast {
+    filter: contrast(150%) brightness(110%);
+  }
+
+  .high-contrast button,
+  .high-contrast input,
+  .high-contrast select,
+  .high-contrast textarea {
+    @apply border-2 border-black bg-white text-black;
+  }
+
+  .high-contrast button:hover,
+  .high-contrast button:focus {
+    @apply bg-black text-white;
+  }
+
+  /* Large text mode */
+  .large-text {
+    font-size: 1.25em;
+    line-height: 1.6;
+  }
+
+  .large-text h1 {
+    font-size: 2.5em;
+  }
+  .large-text h2 {
+    font-size: 2em;
+  }
+  .large-text h3 {
+    font-size: 1.75em;
+  }
+  .large-text h4 {
+    font-size: 1.5em;
+  }
+  .large-text button {
+    font-size: 1.125em;
+    padding: 0.75rem 1.5rem;
+  }
+}
+
+/* Print styles */
+@media print {
+  body {
+    @apply bg-white text-black;
+    font-size: 12pt;
+    line-height: 1.4;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .print-break-before {
+    page-break-before: always;
+  }
+
+  .print-break-after {
+    page-break-after: always;
+  }
+
+  .print-break-inside-avoid {
+    page-break-inside: avoid;
+  }
+
+  /* Recipe specific print styles */
+  .recipe-ingredients {
+    page-break-inside: avoid;
+    border: 1px solid #000;
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .recipe-step {
+    page-break-inside: avoid;
+    margin-bottom: 0.5rem;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 0.5rem;
+  }
+
+  .recipe-image {
+    max-width: 4in;
+    max-height: 3in;
+    page-break-inside: avoid;
+  }
+
+  /* Remove backgrounds and shadows for print */
+  * {
+    background: transparent !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    color: black !important;
+  }
+
+  /* Show URLs for links */
+  a[href]:after {
+    content: ' (' attr(href) ')';
+    font-size: 10pt;
+    color: #666;
+  }
+
+  /* Hide navigation and non-content elements */
+  nav,
+  .navigation,
+  .sidebar,
+  .footer,
+  button:not(.print-include) {
+    display: none !important;
+  }
 }
