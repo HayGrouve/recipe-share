@@ -27,6 +27,7 @@ import { useUser } from '@clerk/nextjs';
 import { formatDistanceToNow } from 'date-fns';
 import Link from 'next/link';
 import { toast } from 'sonner';
+import { announce } from '@/lib/focus-management';
 
 interface NotificationUser {
   id: string;
@@ -63,21 +64,25 @@ const notificationTypeConfig = {
     icon: UserPlus,
     color: 'text-purple-600',
     bgColor: 'bg-purple-50',
+    ariaLabel: 'New follower notification',
   },
   recipe_comment: {
     icon: MessageCircle,
     color: 'text-blue-600',
     bgColor: 'bg-blue-50',
+    ariaLabel: 'Recipe comment notification',
   },
   recipe_rating: {
     icon: Star,
     color: 'text-yellow-600',
     bgColor: 'bg-yellow-50',
+    ariaLabel: 'Recipe rating notification',
   },
   friend_activity: {
     icon: ChefHat,
     color: 'text-green-600',
     bgColor: 'bg-green-50',
+    ariaLabel: 'Friend activity notification',
   },
 };
 
@@ -168,9 +173,12 @@ export function Notifications({
       );
       setUnreadCount((prev) => Math.max(0, prev - 1));
 
+      // Announce to screen readers
+      announce('Notification marked as read');
       toast.success('Notification marked as read');
     } catch (error) {
       console.error('Error marking notification as read:', error);
+      announce('Failed to mark notification as read');
       toast.error('Failed to mark as read');
     }
   };
@@ -199,9 +207,12 @@ export function Notifications({
       setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
       setUnreadCount(0);
 
+      // Announce to screen readers
+      announce(`All ${notifications.length} notifications marked as read`);
       toast.success('All notifications marked as read');
     } catch (error) {
       console.error('Error marking all notifications as read:', error);
+      announce('Failed to mark all notifications as read');
       toast.error('Failed to mark all as read');
     }
   };
@@ -216,7 +227,9 @@ export function Notifications({
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ notificationId }),
+        body: JSON.stringify({
+          notificationId,
+        }),
       });
 
       if (!response.ok) {
@@ -233,9 +246,12 @@ export function Notifications({
         setUnreadCount((prev) => Math.max(0, prev - 1));
       }
 
+      // Announce to screen readers
+      announce('Notification deleted');
       toast.success('Notification deleted');
     } catch (error) {
       console.error('Error deleting notification:', error);
+      announce('Failed to delete notification');
       toast.error('Failed to delete notification');
     }
   };
@@ -244,13 +260,19 @@ export function Notifications({
     const nextPage = page + 1;
     setPage(nextPage);
     fetchNotifications(nextPage);
+    announce(`Loading more notifications, page ${nextPage}`);
   };
 
   if (loading) {
     return (
-      <div className={`space-y-4 ${className}`}>
+      <div
+        className={`space-y-4 ${className}`}
+        role="status"
+        aria-live="polite"
+      >
+        <span className="sr-only">Loading notifications...</span>
         {[...Array(3)].map((_, i) => (
-          <Card key={i} className="p-4">
+          <Card key={i} className="p-4" aria-hidden="true">
             <div className="flex items-start space-x-3">
               <div className="h-10 w-10 animate-pulse rounded-full bg-gray-200" />
               <div className="flex-1 space-y-2">
@@ -266,9 +288,13 @@ export function Notifications({
 
   if (error) {
     return (
-      <div className={`py-8 text-center ${className}`}>
+      <div className={`py-8 text-center ${className}`} role="alert">
         <div className="mb-4 text-gray-500">{error}</div>
-        <Button onClick={() => fetchNotifications(1)} variant="outline">
+        <Button
+          onClick={() => fetchNotifications(1)}
+          variant="outline"
+          aria-label="Retry loading notifications"
+        >
           Try Again
         </Button>
       </div>
@@ -277,8 +303,14 @@ export function Notifications({
 
   if (notifications.length === 0) {
     return (
-      <div className={`py-8 text-center text-gray-500 ${className}`}>
-        <Bell className="mx-auto mb-4 h-12 w-12 text-gray-300" />
+      <div
+        className={`py-8 text-center text-gray-500 ${className}`}
+        role="status"
+      >
+        <Bell
+          className="mx-auto mb-4 h-12 w-12 text-gray-300"
+          aria-hidden="true"
+        />
         <p className="mb-2 text-lg font-medium">
           {unreadOnly ? 'No unread notifications' : 'No notifications yet'}
         </p>
@@ -292,129 +324,205 @@ export function Notifications({
 
   return (
     <div className={`space-y-4 ${className}`}>
+      {/* Notifications Header */}
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center space-x-3">
-          <h2 className="text-xl font-semibold">Notifications</h2>
+          <h2 className="text-xl font-semibold" id="notifications-heading">
+            Notifications
+          </h2>
           {unreadCount > 0 && (
-            <Badge variant="destructive" className="px-2 py-1">
+            <Badge
+              variant="destructive"
+              className="px-2 py-1"
+              aria-label={`${unreadCount} unread notification${unreadCount !== 1 ? 's' : ''}`}
+            >
               {unreadCount}
             </Badge>
           )}
         </div>
         {unreadCount > 0 && (
-          <Button onClick={handleMarkAllAsRead} variant="outline" size="sm">
-            <Check className="mr-2 h-4 w-4" />
+          <Button
+            onClick={handleMarkAllAsRead}
+            variant="outline"
+            size="sm"
+            aria-label={`Mark all ${unreadCount} notifications as read`}
+          >
+            <Check className="mr-2 h-4 w-4" aria-hidden="true" />
             Mark All Read
           </Button>
         )}
       </div>
 
-      {notifications.map((notification) => {
-        const config = notificationTypeConfig[notification.type];
-        const IconComponent = config.icon;
+      {/* Notifications List */}
+      <div
+        role="region"
+        aria-labelledby="notifications-heading"
+        aria-live="polite"
+        aria-describedby="notifications-description"
+      >
+        <div id="notifications-description" className="sr-only">
+          {notifications.length} notification
+          {notifications.length !== 1 ? 's' : ''} total,
+          {unreadCount} unread. Use tab and arrow keys to navigate.
+        </div>
 
-        return (
-          <Card
-            key={notification.id}
-            className={`transition-shadow hover:shadow-md ${
-              !notification.isRead
-                ? 'border-l-4 border-l-blue-500 bg-blue-50/30'
-                : ''
-            }`}
-          >
-            <CardContent className="p-4">
-              <div className="flex items-start space-x-3">
-                <Avatar className="h-10 w-10">
-                  <AvatarImage
-                    src={notification.triggerUser.image}
-                    alt={notification.triggerUser.name}
-                  />
-                  <AvatarFallback>
-                    {notification.triggerUser.name
-                      .split(' ')
-                      .map((n) => n[0])
-                      .join('')}
-                  </AvatarFallback>
-                </Avatar>
+        {notifications.map((notification) => {
+          const config = notificationTypeConfig[notification.type];
+          const IconComponent = config.icon;
+          const isUnread = !notification.isRead;
 
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-start justify-between">
-                    <div className="mb-1 flex items-center space-x-2">
-                      <div className={`rounded-full p-1.5 ${config.bgColor}`}>
-                        <IconComponent className={`h-3 w-3 ${config.color}`} />
-                      </div>
-                      <span className="text-sm font-medium">
-                        {notification.title}
-                      </span>
-                      {!notification.isRead && (
-                        <div className="h-2 w-2 rounded-full bg-blue-500" />
-                      )}
-                    </div>
+          return (
+            <article
+              key={notification.id}
+              className={`transition-shadow hover:shadow-md ${
+                isUnread ? 'border-l-4 border-l-blue-500 bg-blue-50/30' : ''
+              }`}
+              role="article"
+              aria-labelledby={`notification-${notification.id}-title`}
+              aria-describedby={`notification-${notification.id}-content`}
+              tabIndex={0}
+            >
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-start space-x-3">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage
+                        src={notification.triggerUser.image}
+                        alt=""
+                      />
+                      <AvatarFallback>
+                        {notification.triggerUser.name
+                          .split(' ')
+                          .map((n) => n[0])
+                          .join('')}
+                      </AvatarFallback>
+                    </Avatar>
 
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-6 w-6 p-0"
-                        >
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        {!notification.isRead && (
-                          <DropdownMenuItem
-                            onClick={() => handleMarkAsRead(notification.id)}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start justify-between">
+                        <div className="mb-1 flex items-center space-x-2">
+                          <div
+                            className={`rounded-full p-1.5 ${config.bgColor}`}
+                            role="img"
+                            aria-label={config.ariaLabel}
                           >
-                            <Check className="mr-2 h-4 w-4" />
-                            Mark as read
-                          </DropdownMenuItem>
-                        )}
-                        <DropdownMenuItem
-                          onClick={() => handleDelete(notification.id)}
-                          className="text-red-600"
-                        >
-                          <X className="mr-2 h-4 w-4" />
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
+                            <IconComponent
+                              className={`h-3 w-3 ${config.color}`}
+                              aria-hidden="true"
+                            />
+                          </div>
+                          <span
+                            className="text-sm font-medium"
+                            id={`notification-${notification.id}-title`}
+                          >
+                            {notification.title}
+                          </span>
+                          {isUnread && (
+                            <div
+                              className="h-2 w-2 rounded-full bg-blue-500"
+                              role="img"
+                              aria-label="Unread notification"
+                            />
+                          )}
+                        </div>
 
-                  <p className="mb-2 text-sm text-gray-600">
-                    {notification.message}
-                  </p>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 w-6 p-0"
+                              aria-label={`More actions for notification from ${notification.triggerUser.name}`}
+                            >
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            {isUnread && (
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  handleMarkAsRead(notification.id)
+                                }
+                              >
+                                <Check
+                                  className="mr-2 h-4 w-4"
+                                  aria-hidden="true"
+                                />
+                                Mark as read
+                              </DropdownMenuItem>
+                            )}
+                            <DropdownMenuItem
+                              onClick={() => handleDelete(notification.id)}
+                              className="text-red-600"
+                            >
+                              <X className="mr-2 h-4 w-4" aria-hidden="true" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
 
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center text-xs text-gray-500">
-                      <Clock className="mr-1 h-3 w-3" />
-                      {formatDistanceToNow(notification.createdAt, {
-                        addSuffix: true,
-                      })}
+                      <div id={`notification-${notification.id}-content`}>
+                        <p className="mb-2 text-sm text-gray-600">
+                          <span className="sr-only">
+                            Notification from {notification.triggerUser.name}:
+                          </span>
+                          {notification.message}
+                        </p>
+
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center text-xs text-gray-500">
+                            <Clock
+                              className="mr-1 h-3 w-3"
+                              aria-hidden="true"
+                            />
+                            <time
+                              dateTime={notification.createdAt.toISOString()}
+                            >
+                              {formatDistanceToNow(notification.createdAt, {
+                                addSuffix: true,
+                              })}
+                            </time>
+                          </div>
+
+                          <Link
+                            href={notification.actionUrl}
+                            className="rounded-sm text-sm font-medium text-blue-600 hover:text-blue-800 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
+                            aria-label={`View ${notification.type.replace('_', ' ')} from ${notification.triggerUser.name}`}
+                          >
+                            View
+                          </Link>
+                        </div>
+                      </div>
                     </div>
-
-                    <Link
-                      href={notification.actionUrl}
-                      className="text-sm font-medium text-blue-600 hover:text-blue-800"
-                    >
-                      View
-                    </Link>
                   </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        );
-      })}
+                </CardContent>
+              </Card>
+            </article>
+          );
+        })}
+      </div>
 
+      {/* Load More Button */}
       {hasMore && (
         <div className="py-4 text-center">
-          <Button onClick={handleLoadMore} variant="outline">
-            <Loader2 className="mr-2 h-4 w-4" />
+          <Button
+            onClick={handleLoadMore}
+            variant="outline"
+            aria-label="Load more notifications"
+            aria-describedby="load-more-description"
+          >
+            <Loader2 className="mr-2 h-4 w-4" aria-hidden="true" />
             Load More
           </Button>
+          <div id="load-more-description" className="sr-only">
+            Currently showing {notifications.length} of all notifications
+          </div>
         </div>
       )}
+
+      {/* Live region for announcements */}
+      <div aria-live="polite" aria-atomic="true" className="sr-only" />
     </div>
   );
 }
