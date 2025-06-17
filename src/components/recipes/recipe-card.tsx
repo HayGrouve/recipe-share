@@ -58,13 +58,13 @@ export function RecipeCard({
     }
   };
 
-  const handleBookmark = (e: React.MouseEvent) => {
+  const handleBookmark = (e: React.MouseEvent | React.KeyboardEvent) => {
     e.preventDefault();
     e.stopPropagation();
     onBookmark?.(recipe.id);
   };
 
-  const handleLike = (e: React.MouseEvent) => {
+  const handleLike = (e: React.MouseEvent | React.KeyboardEvent) => {
     e.preventDefault();
     e.stopPropagation();
     onLike?.(recipe.id);
