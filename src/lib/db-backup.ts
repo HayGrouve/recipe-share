@@ -44,7 +44,7 @@ export const createDatabaseBackup = async (): Promise<BackupData> => {
         const data = await db.select().from(table);
         console.log(`✓ Backed up ${data.length} records from ${tableName}`);
         return data;
-      } catch (error: any) {
+      } catch (error: unknown) {
         if (error.code === '42P01') {
           console.log(`⚠ Table ${tableName} doesn't exist, skipping...`);
           return [];
