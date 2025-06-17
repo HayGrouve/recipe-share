@@ -1,0 +1,92 @@
+version: 2
+updates:
+  # Enable version updates for npm
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Etc/UTC"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "@Tseko"
+    assignees:
+      - "@Tseko"
+    commit-message:
+      prefix: "deps"
+      prefix-development: "deps-dev"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "automated"
+    ignore:
+      # Ignore major versions for critical packages that might break things
+      - dependency-name: "next"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-dom"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@clerk/nextjs"
+        update-types: ["version-update:semver-major"]
+    groups:
+      # Group React-related updates
+      react-ecosystem:
+        patterns:
+          - "react*"
+          - "@types/react*"
+      # Group Next.js related updates
+      nextjs-ecosystem:
+        patterns:
+          - "next*"
+          - "@next/*"
+      # Group UI libraries
+      ui-libraries:
+        patterns:
+          - "@radix-ui/*"
+          - "lucide-react"
+          - "class-variance-authority"
+          - "clsx"
+          - "tailwind*"
+      # Group testing tools
+      testing-tools:
+        patterns:
+          - "*jest*"
+          - "*test*"
+          - "playwright"
+          - "@playwright/*"
+      # Group dev tools
+      dev-tools:
+        patterns:
+          - "eslint*"
+          - "prettier*"
+          - "typescript"
+          - "@types/*"
+      # Group security and patch updates (high priority)
+      security-updates:
+        patterns:
+          - "*"
+        update-types:
+          - "patch"
+          - "minor"
+
+  # Enable version updates for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "10:00"
+      timezone: "Etc/UTC"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "@Tseko"
+    assignees:
+      - "@Tseko"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+    labels:
+      - "github-actions"
+      - "automated" 

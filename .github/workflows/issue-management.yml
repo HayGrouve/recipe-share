@@ -1,0 +1,88 @@
+name: Issue Management
+
+on:
+  issues:
+    types: [opened, edited, labeled, unlabeled]
+  pull_request:
+    types: [opened, edited, labeled, unlabeled, synchronize]
+
+jobs:
+  auto-label:
+    name: Auto-label Issues and PRs
+    runs-on: ubuntu-latest
+    if: github.event.action == 'opened'
+    
+    steps:
+      - name: Label bug reports
+        if: contains(github.event.issue.title, '[BUG]') || contains(github.event.issue.body, 'bug') || contains(github.event.issue.body, 'error')
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.addLabels({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: ['bug', 'needs-triage']
+            })
+
+      - name: Label feature requests
+        if: contains(github.event.issue.title, '[FEATURE]') || contains(github.event.issue.body, 'feature') || contains(github.event.issue.body, 'enhancement')
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.addLabels({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: ['enhancement', 'needs-review']
+            })
+
+      - name: Label documentation issues
+        if: contains(github.event.issue.title, '[DOCS]') || contains(github.event.issue.body, 'documentation') || contains(github.event.issue.body, 'readme')
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.addLabels({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: ['documentation']
+            })
+
+  auto-assign:
+    name: Auto-assign Issues
+    runs-on: ubuntu-latest
+    if: github.event.action == 'opened' && github.event.issue
+    
+    steps:
+      - name: Assign to project owner
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.addAssignees({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              assignees: [context.repo.owner]
+            })
+
+  stale-check:
+    name: Check for Stale Issues
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    
+    steps:
+      - name: Mark stale issues
+        uses: actions/stale@v8
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          stale-issue-message: 'This issue has been automatically marked as stale because it has not had activity for 30 days. It will be closed if no further activity occurs within 7 days.'
+          stale-pr-message: 'This pull request has been automatically marked as stale because it has not had activity for 30 days. It will be closed if no further activity occurs within 7 days.'
+          close-issue-message: 'This issue has been automatically closed due to inactivity.'
+          close-pr-message: 'This pull request has been automatically closed due to inactivity.'
+          days-before-stale: 30
+          days-before-close: 7
+          stale-issue-label: 'stale'
+          stale-pr-label: 'stale'
+          exempt-issue-labels: 'pinned,security,enhancement'
+          exempt-pr-labels: 'pinned,security,work-in-progress' 
