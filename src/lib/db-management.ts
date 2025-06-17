@@ -63,7 +63,7 @@ export const checkDatabaseHealth = async (): Promise<DatabaseHealth> => {
   try {
     if (!sql) {
       // Initialize connection if not available
-      const database = getDb();
+      getDb();
       if (!sql) {
         throw new Error('Failed to initialize database connection');
       }
@@ -71,7 +71,8 @@ export const checkDatabaseHealth = async (): Promise<DatabaseHealth> => {
 
     // Basic connectivity test using raw SQL connection
     const testQuery = 'SELECT 1 as test';
-    await sql(testQuery);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (sql as any)(testQuery);
 
     // Check connection count
     const connectionQuery = `
@@ -197,12 +198,20 @@ export const getDatabaseMetrics = async (): Promise<DatabaseMetrics> => {
     const performanceStat = performanceStats[0] as PerformanceStat;
 
     return {
-      tableStats: tableStats.map((stat: any) => ({
-        tableName: stat.tablename,
-        rowCount: parseInt(stat.total_operations || '0'),
-        tableSize: stat.table_size,
-        indexSize: stat.index_size,
-      })),
+      tableStats: tableStats.map((stat: unknown) => {
+        const tableStat = stat as {
+          tablename: string;
+          total_operations: string;
+          table_size: string;
+          index_size: string;
+        };
+        return {
+          tableName: tableStat.tablename,
+          rowCount: parseInt(tableStat.total_operations || '0'),
+          tableSize: tableStat.table_size,
+          indexSize: tableStat.index_size,
+        };
+      }),
       connectionStats: {
         totalConnections: parseInt(
           connectionStat?.total_connections?.toString() || '0'
@@ -276,8 +285,9 @@ export const cleanupOldData = async (daysOld: number = 30) => {
         WHERE created_at < ${cutoffDate.toISOString()}
       `;
       console.log(`Cleaned up analytics data older than ${daysOld} days`);
-    } catch (error: any) {
-      if (error.code !== '42P01') {
+    } catch (error: unknown) {
+      const pgError = error as { code?: string };
+      if (pgError.code !== '42P01') {
         // Table doesn't exist error
         throw error;
       }
@@ -291,8 +301,9 @@ export const cleanupOldData = async (daysOld: number = 30) => {
         WHERE expires_at < ${new Date().toISOString()}
       `;
       console.log('Cleaned up expired user sessions');
-    } catch (error: any) {
-      if (error.code !== '42P01') {
+    } catch (error: unknown) {
+      const pgError = error as { code?: string };
+      if (pgError.code !== '42P01') {
         // Table doesn't exist error
         throw error;
       }

@@ -167,7 +167,7 @@ class Analytics {
 
     this.track('page_view', {
       page: pageUrl || 'unknown',
-      title: typeof window !== 'undefined' ? document.title : undefined,
+      title: typeof window !== 'undefined' ? document.title : 'Unknown',
     });
   }
 

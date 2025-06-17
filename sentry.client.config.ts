@@ -8,12 +8,7 @@ Sentry.init({
 
   // Performance monitoring
   integrations: [
-    Sentry.replayIntegration({
-      // Capture 10% of all sessions
-      sessionSampleRate: 0.1,
-      // Capture 100% of sessions with an error
-      errorSampleRate: 1.0,
-    }),
+    Sentry.replayIntegration(),
     Sentry.browserTracingIntegration({
       // Capture interactions like clicks, form submissions, and navigation
       enableInp: true,
@@ -27,8 +22,7 @@ Sentry.init({
   replaysSessionSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
   replaysOnErrorSampleRate: 1.0,
 
-  // Capture unhandled promise rejections
-  captureUnhandledRejections: true,
+  // Auto-capture unhandled rejections (default behavior)
 
   // Enhanced error context
   beforeSend(event) {

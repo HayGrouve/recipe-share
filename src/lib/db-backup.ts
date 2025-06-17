@@ -36,8 +36,10 @@ export const createDatabaseBackup = async (): Promise<BackupData> => {
 
   try {
     // Function to safely backup a table
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async function safeBackupTable(
       tableName: string,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       table: any
     ): Promise<unknown[]> {
       try {
@@ -45,11 +47,15 @@ export const createDatabaseBackup = async (): Promise<BackupData> => {
         console.log(`✓ Backed up ${data.length} records from ${tableName}`);
         return data;
       } catch (error: unknown) {
-        if (error.code === '42P01') {
+        const pgError = error as { code?: string; message?: string };
+        if (pgError.code === '42P01') {
           console.log(`⚠ Table ${tableName} doesn't exist, skipping...`);
           return [];
         }
-        console.error(`✗ Failed to backup ${tableName}:`, error.message);
+        console.error(
+          `✗ Failed to backup ${tableName}:`,
+          pgError.message || 'Unknown error'
+        );
         throw error;
       }
     }

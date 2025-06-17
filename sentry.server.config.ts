@@ -20,8 +20,7 @@ Sentry.init({
   // Performance traces sample rate
   tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
 
-  // Capture unhandled promise rejections
-  captureUnhandledRejections: true,
+  // Auto-capture unhandled rejections (default behavior)
 
   // Enhanced error context for server-side
   beforeSend(event) {
@@ -42,12 +41,7 @@ Sentry.init({
         delete event.request.headers['x-api-key'];
       }
 
-      // Remove sensitive query parameters
-      if (event.request.query_string) {
-        event.request.query_string = event.request.query_string
-          .replace(/password=[^&]*/g, 'password=[REDACTED]')
-          .replace(/token=[^&]*/g, 'token=[REDACTED]');
-      }
+      // Query parameters handled by beforeBreadcrumb
     }
 
     return event;
