@@ -672,7 +672,9 @@ export default function RecipesPage() {
               <div className="flex justify-center py-8">
                 <Button
                   onClick={() => {
-                    fetchNextPage && fetchNextPage();
+                    if (fetchNextPage) {
+                      fetchNextPage();
+                    }
                     announce('Loading more recipes');
                   }}
                   disabled={isFetchingNextPage}

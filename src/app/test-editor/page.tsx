@@ -12,7 +12,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { X } from 'lucide-react';\nimport { announce } from '@/lib/focus-management';
+import { X } from 'lucide-react';
 
 export default function TestEditorPage() {
   const [content, setContent] = useState(`

@@ -142,9 +142,9 @@
 @layer components {
   /* Focus-visible polyfill support */
   .focus-visible {
-    @apply outline-none ring-2 ring-primary ring-offset-2;
+    @apply ring-primary ring-2 ring-offset-2 outline-none;
   }
-  
+
   /* Better focus outlines for interactive elements */
   button:focus-visible,
   input:focus-visible,
@@ -152,8 +152,49 @@
   select:focus-visible,
   a:focus-visible,
   [tabindex]:focus-visible {
-    @apply outline-none ring-2 ring-primary ring-offset-2;
+    @apply ring-primary ring-2 ring-offset-2 outline-none;
   }
-  
+
   /* Skip links styling */
   .skip-link {
+    @apply focus:bg-primary focus:text-primary-foreground sr-only focus:not-sr-only focus:fixed focus:top-0 focus:left-0 focus:z-50 focus:rounded-br-lg focus:p-4;
+  }
+
+  /* High contrast mode support */
+  @media (prefers-contrast: high) {
+    button:focus-visible,
+    input:focus-visible,
+    textarea:focus-visible,
+    select:focus-visible,
+    a:focus-visible,
+    [tabindex]:focus-visible {
+      @apply ring-4 ring-black;
+    }
+  }
+
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  /* Focus trapping utility */
+  .focus-trap {
+    @apply relative;
+  }
+
+  /* Live region for screen readers */
+  .sr-live {
+    @apply sr-only;
+  }
+
+  /* Keyboard navigation helpers */
+  .keyboard-nav-active button:focus,
+  .keyboard-nav-active a:focus,
+  .keyboard-nav-active [tabindex]:focus {
+    @apply ring-primary ring-2 ring-offset-2;
+  }
+}
