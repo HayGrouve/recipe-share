@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useUser } from '@clerk/nextjs';
+import Image from 'next/image';
 import {
   Star,
   MessageCircle,
@@ -135,9 +136,11 @@ const CommentItem = ({
         <div className="flex-shrink-0">
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200">
             {comment.userAvatar ? (
-              <img
+              <Image
                 src={comment.userAvatar}
                 alt={comment.userName}
+                width={32}
+                height={32}
                 className="h-8 w-8 rounded-full"
               />
             ) : (

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -94,58 +94,58 @@ export function ActivityFeed({ userId, className }: ActivityFeedProps) {
   const [hasMore, setHasMore] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchActivities = async (
-    pageNum: number = 1,
-    refresh: boolean = false
-  ) => {
-    try {
-      if (refresh) {
-        setRefreshing(true);
-      } else if (pageNum === 1) {
-        setLoading(true);
+  const fetchActivities = useCallback(
+    async (pageNum: number = 1, refresh: boolean = false) => {
+      try {
+        if (refresh) {
+          setRefreshing(true);
+        } else if (pageNum === 1) {
+          setLoading(true);
+        }
+
+        const targetUserId = userId || user?.id;
+        if (!targetUserId) return;
+
+        const response = await fetch(
+          `/api/users/${targetUserId}/activity-feed?page=${pageNum}&limit=20`
+        );
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch activity feed');
+        }
+
+        const data = await response.json();
+
+        // Convert string dates back to Date objects
+        const formattedActivities = data.activities.map(
+          (activity: Activity & { createdAt: string }) => ({
+            ...activity,
+            createdAt: new Date(activity.createdAt),
+          })
+        );
+
+        if (pageNum === 1 || refresh) {
+          setActivities(formattedActivities);
+        } else {
+          setActivities((prev) => [...prev, ...formattedActivities]);
+        }
+
+        setHasMore(data.pagination.hasMore);
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching activities:', err);
+        setError('Failed to load activity feed');
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
       }
-
-      const targetUserId = userId || user?.id;
-      if (!targetUserId) return;
-
-      const response = await fetch(
-        `/api/users/${targetUserId}/activity-feed?page=${pageNum}&limit=20`
-      );
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch activity feed');
-      }
-
-      const data = await response.json();
-
-      // Convert string dates back to Date objects
-      const formattedActivities = data.activities.map(
-        (activity: Activity & { createdAt: string }) => ({
-          ...activity,
-          createdAt: new Date(activity.createdAt),
-        })
-      );
-
-      if (pageNum === 1 || refresh) {
-        setActivities(formattedActivities);
-      } else {
-        setActivities((prev) => [...prev, ...formattedActivities]);
-      }
-
-      setHasMore(data.pagination.hasMore);
-      setError(null);
-    } catch (err) {
-      console.error('Error fetching activities:', err);
-      setError('Failed to load activity feed');
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  };
+    },
+    [userId, user?.id]
+  );
 
   useEffect(() => {
     fetchActivities(1);
-  }, [userId, user?.id]);
+  }, [fetchActivities]);
 
   const handleRefresh = () => {
     setPage(1);

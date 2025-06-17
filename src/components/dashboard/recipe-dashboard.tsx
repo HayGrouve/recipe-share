@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import {
   Search,
   Grid3X3,
@@ -438,9 +439,11 @@ export function RecipeDashboard() {
         </div>
 
         {recipe.images[0] && (
-          <img
+          <Image
             src={recipe.images[0]}
             alt={recipe.title}
+            width={400}
+            height={192}
             className="h-48 w-full rounded-md object-cover"
           />
         )}
@@ -491,9 +494,11 @@ export function RecipeDashboard() {
             />
 
             {recipe.images[0] && (
-              <img
+              <Image
                 src={recipe.images[0]}
                 alt={recipe.title}
+                width={64}
+                height={64}
                 className="h-16 w-16 rounded-md object-cover"
               />
             )}

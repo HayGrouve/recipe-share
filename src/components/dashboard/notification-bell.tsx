@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -22,7 +22,7 @@ export function NotificationBell({ className }: NotificationBellProps) {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
 
-  const fetchUnreadCount = async () => {
+  const fetchUnreadCount = useCallback(async () => {
     try {
       if (!user?.id) return;
 
@@ -37,7 +37,7 @@ export function NotificationBell({ className }: NotificationBellProps) {
     } catch (error) {
       console.error('Error fetching unread count:', error);
     }
-  };
+  }, [user?.id]);
 
   useEffect(() => {
     fetchUnreadCount();
@@ -46,7 +46,7 @@ export function NotificationBell({ className }: NotificationBellProps) {
     const interval = setInterval(fetchUnreadCount, 30000);
 
     return () => clearInterval(interval);
-  }, [user?.id]);
+  }, [fetchUnreadCount]);
 
   if (!user) return null;
 

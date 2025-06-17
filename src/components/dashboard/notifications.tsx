@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -99,53 +99,56 @@ export function Notifications({
   const [unreadCount, setUnreadCount] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchNotifications = async (pageNum: number = 1) => {
-    try {
-      if (pageNum === 1) {
-        setLoading(true);
+  const fetchNotifications = useCallback(
+    async (pageNum: number = 1) => {
+      try {
+        if (pageNum === 1) {
+          setLoading(true);
+        }
+
+        const targetUserId = userId || user?.id;
+        if (!targetUserId) return;
+
+        const response = await fetch(
+          `/api/users/${targetUserId}/notifications?page=${pageNum}&limit=20&unreadOnly=${unreadOnly}`
+        );
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch notifications');
+        }
+
+        const data = await response.json();
+
+        // Convert string dates back to Date objects
+        const formattedNotifications = data.notifications.map(
+          (notification: Notification & { createdAt: string }) => ({
+            ...notification,
+            createdAt: new Date(notification.createdAt),
+          })
+        );
+
+        if (pageNum === 1) {
+          setNotifications(formattedNotifications);
+        } else {
+          setNotifications((prev) => [...prev, ...formattedNotifications]);
+        }
+
+        setHasMore(data.pagination.hasMore);
+        setUnreadCount(data.unreadCount);
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching notifications:', err);
+        setError('Failed to load notifications');
+      } finally {
+        setLoading(false);
       }
-
-      const targetUserId = userId || user?.id;
-      if (!targetUserId) return;
-
-      const response = await fetch(
-        `/api/users/${targetUserId}/notifications?page=${pageNum}&limit=20&unreadOnly=${unreadOnly}`
-      );
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch notifications');
-      }
-
-      const data = await response.json();
-
-      // Convert string dates back to Date objects
-      const formattedNotifications = data.notifications.map(
-        (notification: Notification & { createdAt: string }) => ({
-          ...notification,
-          createdAt: new Date(notification.createdAt),
-        })
-      );
-
-      if (pageNum === 1) {
-        setNotifications(formattedNotifications);
-      } else {
-        setNotifications((prev) => [...prev, ...formattedNotifications]);
-      }
-
-      setHasMore(data.pagination.hasMore);
-      setUnreadCount(data.unreadCount);
-      setError(null);
-    } catch (err) {
-      console.error('Error fetching notifications:', err);
-      setError('Failed to load notifications');
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    [userId, user?.id, unreadOnly]
+  );
 
   useEffect(() => {
     fetchNotifications(1);
-  }, [userId, user?.id, unreadOnly]);
+  }, [fetchNotifications]);
 
   const handleMarkAsRead = async (notificationId: number) => {
     try {
