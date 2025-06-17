@@ -26,6 +26,13 @@ export const metadata: Metadata = {
   description:
     'A modern recipe sharing platform for you and your friends. Discover, create, and share delicious recipes with an intuitive and responsive interface.',
   keywords: ['recipes', 'cooking', 'food', 'share', 'culinary', 'kitchen'],
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
+    viewportFit: 'cover',
+  },
 };
 
 export default function RootLayout({
@@ -43,7 +50,9 @@ export default function RootLayout({
           <QueryProvider>
             <div className="flex min-h-screen flex-col">
               <Header />
-              <main className="flex-1">{children}</main>
+              <main id="main-content" className="flex-1">
+                {children}
+              </main>
               <Footer />
             </div>
             <Toaster position="top-right" richColors />

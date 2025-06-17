@@ -1,169 +1,148 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
-import { follows, users, recipes, ratings } from '@haygrouve/db-schema';
-import { eq, desc, inArray } from 'drizzle-orm';
+import { auth } from '@clerk/nextjs/server';
 
-interface RouteParams {
-  params: Promise<{ id: string }>;
-}
-
-interface ActivityItem {
-  id: string;
-  type: 'recipe_created' | 'recipe_rated';
-  userId: string;
-  userName: string;
-  userImage: string | null;
-  createdAt: Date;
-  recipe?: {
-    id: string;
-    title: string;
-    description: string | null;
-  };
-  rating?: {
-    value: number;
-    comment: string | null;
-  };
-}
-
-// GET /api/users/[id]/activity-feed - Get activity feed for user's connections
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
-    const { id: userId } = await params;
-    const { searchParams } = new URL(request.url);
-    const limit = parseInt(searchParams.get('limit') || '20');
-    const offset = parseInt(searchParams.get('offset') || '0');
-
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'User ID is required' },
-        { status: 400 }
-      );
+    // Get authenticated user
+    const { userId: clerkId } = await auth();
+    if (!clerkId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get users that this user follows
-    const followingUsers = await db
-      .select({ userId: follows.followingId })
-      .from(follows)
-      .where(eq(follows.followerId, userId));
+    // Get params asynchronously
+    const { id } = await params;
 
-    if (followingUsers.length === 0) {
-      return NextResponse.json({
-        success: true,
-        data: {
-          activities: [],
-          hasMore: false,
-        },
-      });
+    // Check if user is requesting their own activity feed
+    const targetUserId = id;
+    const isOwnFeed = clerkId === targetUserId;
+
+    if (!isOwnFeed) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const followingUserIds = followingUsers.map((f) => f.userId);
+    // Get query parameters for pagination
+    const url = new URL(request.url);
+    const page = parseInt(url.searchParams.get('page') || '1');
+    const limit = parseInt(url.searchParams.get('limit') || '20');
 
-    // Get recent recipes from followed users
-    const recentRecipes = await db
-      .select({
-        id: recipes.id,
-        title: recipes.title,
-        description: recipes.description,
-        userId: recipes.userId,
-        createdAt: recipes.createdAt,
-        userName: users.firstName,
-        userLastName: users.lastName,
-        userImage: users.profileImageUrl,
-      })
-      .from(recipes)
-      .innerJoin(users, eq(recipes.userId, users.id))
-      .where(inArray(recipes.userId, followingUserIds))
-      .orderBy(desc(recipes.createdAt))
-      .limit(limit)
-      .offset(offset);
-
-    // Get recent ratings from followed users
-    const recentRatings = await db
-      .select({
-        id: ratings.id,
-        value: ratings.rating,
-        comment: ratings.comment,
-        userId: ratings.userId,
-        recipeId: ratings.recipeId,
-        createdAt: ratings.createdAt,
-        userName: users.firstName,
-        userLastName: users.lastName,
-        userImage: users.profileImageUrl,
-        recipeTitle: recipes.title,
-        recipeDescription: recipes.description,
-      })
-      .from(ratings)
-      .innerJoin(users, eq(ratings.userId, users.id))
-      .innerJoin(recipes, eq(ratings.recipeId, recipes.id))
-      .where(inArray(ratings.userId, followingUserIds))
-      .orderBy(desc(ratings.createdAt))
-      .limit(limit)
-      .offset(offset);
-
-    // Combine and sort activities
-    const activities: ActivityItem[] = [];
-
-    // Add recipe activities
-    recentRecipes.forEach((recipe) => {
-      activities.push({
-        id: `recipe_${recipe.id}`,
+    // Mock activity feed data until database tables are implemented
+    const mockActivities = [
+      {
+        id: 1,
         type: 'recipe_created',
-        userId: recipe.userId,
-        userName:
-          `${recipe.userName || ''} ${recipe.userLastName || ''}`.trim(),
-        userImage: recipe.userImage,
-        createdAt: recipe.createdAt,
-        recipe: {
-          id: recipe.id,
-          title: recipe.title,
-          description: recipe.description,
+        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
+        user: {
+          id: 'user1',
+          name: 'Sarah Johnson',
+          image:
+            'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face',
         },
-      });
-    });
-
-    // Add rating activities
-    recentRatings.forEach((rating) => {
-      activities.push({
-        id: `rating_${rating.id}`,
+        target: {
+          id: 'recipe1',
+          type: 'recipe',
+          title: 'Chocolate Chip Cookies',
+        },
+        metadata: null,
+      },
+      {
+        id: 2,
         type: 'recipe_rated',
-        userId: rating.userId,
-        userName:
-          `${rating.userName || ''} ${rating.userLastName || ''}`.trim(),
-        userImage: rating.userImage,
-        createdAt: rating.createdAt,
-        recipe: {
-          id: rating.recipeId,
-          title: rating.recipeTitle,
-          description: rating.recipeDescription,
+        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 4), // 4 hours ago
+        user: {
+          id: 'user2',
+          name: 'Mike Chen',
+          image:
+            'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
         },
-        rating: {
-          value: rating.value,
-          comment: rating.comment,
+        target: {
+          id: 'recipe2',
+          type: 'recipe',
+          title: 'Homemade Pizza',
         },
-      });
-    });
+        metadata: {
+          rating: 5,
+          comment: 'Amazing recipe! The crust was perfect.',
+        },
+      },
+      {
+        id: 3,
+        type: 'recipe_saved',
+        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 6), // 6 hours ago
+        user: {
+          id: 'user3',
+          name: 'Emma Wilson',
+          image:
+            'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face',
+        },
+        target: {
+          id: 'recipe3',
+          type: 'recipe',
+          title: 'Thai Green Curry',
+        },
+        metadata: null,
+      },
+      {
+        id: 4,
+        type: 'user_followed',
+        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 8), // 8 hours ago
+        user: {
+          id: 'user4',
+          name: 'David Brown',
+          image:
+            'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
+        },
+        target: {
+          id: 'user5',
+          type: 'user',
+          title: 'Lisa Martinez',
+        },
+        metadata: null,
+      },
+      {
+        id: 5,
+        type: 'recipe_commented',
+        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 12), // 12 hours ago
+        user: {
+          id: 'user5',
+          name: 'Lisa Martinez',
+          image:
+            'https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?w=150&h=150&fit=crop&crop=face',
+        },
+        target: {
+          id: 'recipe4',
+          type: 'recipe',
+          title: 'Caesar Salad',
+        },
+        metadata: {
+          comment: 'Love the homemade croutons tip!',
+        },
+      },
+    ];
 
-    // Sort by creation date (newest first)
-    activities.sort(
-      (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
+    // Paginate results
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + limit;
+    const paginatedActivities = mockActivities.slice(startIndex, endIndex);
 
-    // Take only the requested number of activities
-    const limitedActivities = activities.slice(0, limit);
+    const totalPages = Math.ceil(mockActivities.length / limit);
+    const hasMore = page < totalPages;
 
     return NextResponse.json({
-      success: true,
-      data: {
-        activities: limitedActivities,
-        hasMore: activities.length > limit,
-        followingCount: followingUserIds.length,
+      activities: paginatedActivities,
+      pagination: {
+        page,
+        limit,
+        totalPages,
+        hasMore,
       },
     });
   } catch (error) {
     console.error('Error fetching activity feed:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch activity feed', success: false },
+      { error: 'Failed to fetch activity feed' },
       { status: 500 }
     );
   }
