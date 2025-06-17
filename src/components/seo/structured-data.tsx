@@ -88,32 +88,36 @@ export function StructuredData({ type, data }: StructuredDataProps) {
           structuredData = {
             '@context': 'https://schema.org',
             '@type': 'Recipe',
-            name: data.title,
-            description: data.description,
-            image: data.image ? [data.image] : undefined,
-            author: data.author
+            name: recipeData.title,
+            description: recipeData.description,
+            image: recipeData.image ? [recipeData.image] : undefined,
+            author: recipeData.author
               ? {
                   '@type': 'Person',
-                  name: data.author.name,
-                  image: data.author.image,
+                  name: recipeData.author.name,
+                  image: recipeData.author.image,
                 }
               : undefined,
-            datePublished: data.datePublished,
-            dateModified: data.dateModified,
-            prepTime: data.prepTime ? `PT${data.prepTime}M` : undefined,
-            cookTime: data.cookTime ? `PT${data.cookTime}M` : undefined,
-            totalTime:
-              data.prepTime && data.cookTime
-                ? `PT${data.prepTime + data.cookTime}M`
-                : undefined,
-            recipeYield: data.servings
-              ? `${data.servings} servings`
+            datePublished: recipeData.datePublished,
+            dateModified: recipeData.dateModified,
+            prepTime: recipeData.prepTime
+              ? `PT${recipeData.prepTime}M`
               : undefined,
-            recipeCategory: data.category,
-            recipeCuisine: data.cuisine,
-            difficulty: data.difficulty,
-            recipeIngredient: data.ingredients,
-            recipeInstructions: data.instructions?.map(
+            cookTime: recipeData.cookTime
+              ? `PT${recipeData.cookTime}M`
+              : undefined,
+            totalTime:
+              recipeData.prepTime && recipeData.cookTime
+                ? `PT${recipeData.prepTime + recipeData.cookTime}M`
+                : undefined,
+            recipeYield: recipeData.servings
+              ? `${recipeData.servings} servings`
+              : undefined,
+            recipeCategory: recipeData.category,
+            recipeCuisine: recipeData.cuisine,
+            difficulty: recipeData.difficulty,
+            recipeIngredient: recipeData.ingredients,
+            recipeInstructions: recipeData.instructions?.map(
               (instruction: string, index: number) => ({
                 '@type': 'HowToStep',
                 position: index + 1,
@@ -121,17 +125,17 @@ export function StructuredData({ type, data }: StructuredDataProps) {
               })
             ),
             aggregateRating:
-              data.rating && data.reviewCount
+              recipeData.rating && recipeData.reviewCount
                 ? {
                     '@type': 'AggregateRating',
-                    ratingValue: data.rating,
-                    reviewCount: data.reviewCount,
+                    ratingValue: recipeData.rating,
+                    reviewCount: recipeData.reviewCount,
                   }
                 : undefined,
-            nutrition: data.calories
+            nutrition: recipeData.calories
               ? {
                   '@type': 'NutritionInformation',
-                  calories: `${data.calories} calories`,
+                  calories: `${recipeData.calories} calories`,
                 }
               : undefined,
           };
@@ -140,15 +144,18 @@ export function StructuredData({ type, data }: StructuredDataProps) {
 
       case 'breadcrumb':
         if (data && Array.isArray(data)) {
+          const breadcrumbData = data as BreadcrumbItem[];
           structuredData = {
             '@context': 'https://schema.org',
             '@type': 'BreadcrumbList',
-            itemListElement: data.map((item: any, index: number) => ({
-              '@type': 'ListItem',
-              position: index + 1,
-              name: item.name,
-              item: item.url,
-            })),
+            itemListElement: breadcrumbData.map(
+              (item: BreadcrumbItem, index: number) => ({
+                '@type': 'ListItem',
+                position: index + 1,
+                name: item.name,
+                item: item.url,
+              })
+            ),
           };
         }
         break;
