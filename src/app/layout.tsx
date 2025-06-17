@@ -8,6 +8,12 @@ import { Footer } from '@/components/layout/footer';
 import { ClerkProvider } from '@clerk/nextjs';
 import { QueryProvider } from '@/components/providers/query-provider';
 import { Toaster } from 'sonner';
+import { WebVitals, WebVitalsDisplay } from '@/components/analytics/web-vitals';
+import {
+  PWAInstallPrompt,
+  IOSInstallPrompt,
+} from '@/components/pwa/install-prompt';
+import { OfflineIndicator } from '@/components/pwa/offline-indicator';
 
 const inter = Inter({
   variable: '--font-inter',
@@ -26,13 +32,31 @@ export const metadata: Metadata = {
   description:
     'A modern recipe sharing platform for you and your friends. Discover, create, and share delicious recipes with an intuitive and responsive interface.',
   keywords: ['recipes', 'cooking', 'food', 'share', 'culinary', 'kitchen'],
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false,
-    viewportFit: 'cover',
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Recipe Share',
   },
+  icons: {
+    apple: '/icons/icon-192x192.png',
+  },
+  other: {
+    'mobile-web-app-capable': 'yes',
+    'apple-mobile-web-app-capable': 'yes',
+    'apple-mobile-web-app-status-bar-style': 'default',
+    'msapplication-TileColor': '#ff6b35',
+    'msapplication-TileImage': '/icons/icon-144x144.png',
+  },
+};
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover',
+  themeColor: '#ff6b35',
 };
 
 export default function RootLayout({
@@ -56,6 +80,11 @@ export default function RootLayout({
               <Footer />
             </div>
             <Toaster position="top-right" richColors />
+            <WebVitals />
+            <WebVitalsDisplay />
+            <PWAInstallPrompt />
+            <IOSInstallPrompt />
+            <OfflineIndicator />
           </QueryProvider>
         </body>
       </html>

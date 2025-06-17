@@ -1,11 +1,22 @@
-import { Metadata } from 'next';
-import { Suspense } from 'react';
-import RecipeCreateForm from '@/components/recipes/recipe-create-form';
+'use client';
 
-export const metadata: Metadata = {
-  title: 'Create Recipe - RecipeShare',
-  description: 'Create and share your own recipes with the community',
-};
+import { Suspense } from 'react';
+import dynamic from 'next/dynamic';
+
+// Dynamic import for code splitting
+const RecipeCreateForm = dynamic(
+  () => import('@/components/recipes/recipe-create-form'),
+  {
+    loading: () => (
+      <div className="flex h-64 items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
+      </div>
+    ),
+    ssr: false, // Disable SSR for the form to reduce initial bundle
+  }
+);
+
+// Metadata moved to parent layout since this is now a client component
 
 export default function CreateRecipePage() {
   return (

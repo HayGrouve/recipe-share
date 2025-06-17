@@ -1,7 +1,26 @@
 'use client';
 
 import { useState } from 'react';
-import { RecipeRichTextEditor } from '@/components/editor';
+import dynamic from 'next/dynamic';
+
+// Lazy load the heavy editor component
+const RecipeRichTextEditor = dynamic(
+  () =>
+    import('@/components/editor').then((mod) => ({
+      default: mod.RecipeRichTextEditor,
+    })),
+  {
+    loading: () => (
+      <div className="flex h-[400px] items-center justify-center rounded border bg-gray-50">
+        <div className="text-center">
+          <div className="mx-auto mb-2 h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
+          <p className="text-sm text-gray-600">Loading editor...</p>
+        </div>
+      </div>
+    ),
+    ssr: false,
+  }
+);
 import {
   Card,
   CardContent,
